@@ -5,3 +5,4 @@ Museamp (Music + Amplifier) is an audio level normalizer/amplifier that makes yo
 -FFmpeg [Download](https://ffmpeg.org/download.html)
 -Python [Download](https://www.python.org/downloads/)
 -Mutagen ```pip install mutagen```
+-PySide6 ```pip install PySide6```
