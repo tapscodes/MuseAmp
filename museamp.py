@@ -3,22 +3,24 @@ import os
 import time
 from PySide6.QtWidgets import (
     QApplication, QWidget, QVBoxLayout, QPushButton, QFileDialog,
-    QProgressBar, QMessageBox, QTableWidget, QTableWidgetItem, QAbstractItemView, QHBoxLayout, QHeaderView
+    QProgressBar, QMessageBox, QTableWidget, QTableWidgetItem, QAbstractItemView, QHBoxLayout, QHeaderView,
+    QLineEdit, QLabel
 )
+from PySide6.QtGui import QIntValidator
 from PySide6.QtCore import Qt, QThread, Signal
 from pathlib import Path
 
 #supported file types
 supported_filetypes = {".flac", ".mp3"}
 
-#class to define GUI
+#class to define gui
 class AudioToolGUI(QWidget):
     def __init__(self):
         super().__init__()
         #set basic window properties
         self.setWindowTitle("MuseAmp")
         self.setMinimumSize(700, 500)
-        self.layout = QVBoxLayout(self)  # Main vertical layout
+        self.layout = QVBoxLayout(self)  #main vertical layout
 
         #file info table setup
         self.table = QTableWidget()
@@ -35,20 +37,37 @@ class AudioToolGUI(QWidget):
         self.gain_btn = QPushButton("Apply Gain")
         self.replaygain_btn = QPushButton("Apply ReplayGain")
 
+        #textbox for replaygain value input
+        self.replaygain_input = QLineEdit()
+        self.replaygain_input.setFixedWidth(50)           #fix width for neatness
+        self.replaygain_input.setText("89")                #default replaygain value (db)
+        self.replaygain_input.setValidator(QIntValidator(0, 150, self))  #allow only numbers 0-150
+
+        #label for replaygain input
+        self.replaygain_label = QLabel("Target ReplayGain SPL:")
+
+        #layout for replaygain label + input
+        self.replaygain_layout = QHBoxLayout()
+        self.replaygain_layout.addWidget(self.replaygain_label)
+        self.replaygain_layout.addWidget(self.replaygain_input)
+
         #progress bar defaulting to 100
         self.progress_bar = QProgressBar()
         self.progress_bar.setAlignment(Qt.AlignCenter)
         self.progress_bar.setTextVisible(True)
-        self.progress_bar.setValue(100)         # Default to 100%
+        self.progress_bar.setValue(100)         #default to 100%
         self.progress_bar.setFormat("100%")
 
-        #horizontal layout for buttons
+        #horizontal layout for buttons and input
         self.button_layout = QHBoxLayout()
         for btn in [
             self.add_files_btn, self.add_folder_btn,
             self.remove_files_btn, self.gain_btn, self.replaygain_btn
         ]:
             self.button_layout.addWidget(btn)
+
+        #add replaygain input layout to the right of replaygain button
+        self.button_layout.addLayout(self.replaygain_layout)
 
         #add widgets to the main layout
         self.layout.addWidget(self.table)
@@ -77,7 +96,7 @@ class AudioToolGUI(QWidget):
             QMessageBox.warning(
                 self,
                 "Unsupported File Type",
-                "These files are not supported file types and were not added:\n" + "\n".join(unsupported)
+                "these files are not supported file types and were not added:\n" + "\n".join(unsupported)
             )
 
     #add supported files from folder to table/list
@@ -104,11 +123,11 @@ class AudioToolGUI(QWidget):
         row = self.table.rowCount()
         self.table.insertRow(row)
 
-        self.table.setItem(row, 0, QTableWidgetItem(str(path)))       #File Path
-        self.table.setItem(row, 1, QTableWidgetItem(path.suffix.lower()))  #Extension
-        self.table.setItem(row, 2, QTableWidgetItem("-"))              #Real Codec placeholder
-        self.table.setItem(row, 3, QTableWidgetItem("-"))              #ReplayGain placeholder
-        self.table.setItem(row, 4, QTableWidgetItem("-"))              #Clipping placeholder
+        self.table.setItem(row, 0, QTableWidgetItem(str(path)))       #file path
+        self.table.setItem(row, 1, QTableWidgetItem(path.suffix.lower()))  #extension
+        self.table.setItem(row, 2, QTableWidgetItem("-"))              #real codec placeholder
+        self.table.setItem(row, 3, QTableWidgetItem("-"))              #replaygain placeholder
+        self.table.setItem(row, 4, QTableWidgetItem("-"))              #clipping placeholder
 
     #check if file is already listed in the table/list
     def is_already_listed(self, filepath):
