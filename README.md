@@ -13,6 +13,7 @@ TODO: write this later
 -Analyze & Tag still has 2 popup confirmation windows, will need to fix later
 
 ## Dependancies
+-FFmpeg [Download] (https://ffmpeg.org/) to apply gain to files
 -RSGain [Download](https://github.com/complexlogic/rsgain) for audio analysis
 -Python [Download](https://www.python.org/downloads/) for the libraries below
 -Mutagen ```pip install mutagen``` to edit tags
