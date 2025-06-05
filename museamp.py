@@ -649,7 +649,11 @@ class AudioToolGUI(QWidget):
             QMessageBox.Yes | QMessageBox.No,
             QMessageBox.Yes
         )
-        overwrite = (reply == QMessageBox.Yes)
+        if reply != QMessageBox.Yes:
+            #do not perform the operation if user selects 'No'
+            self.set_ui_enabled(True)
+            self.set_progress(100)
+            return
 
         #get user input for LUFS from textbox
         try:
@@ -666,7 +670,7 @@ class AudioToolGUI(QWidget):
 
         self.worker_thread = QThread()
         self.worker = Worker(files, "tag", lufs)
-        self.worker.overwrite_rg = overwrite
+        self.worker.overwrite_rg = True
         self.worker.moveToThread(self.worker_thread)
         self.worker_thread.started.connect(self.worker.run)
         self.worker.progress.connect(self.set_progress)
