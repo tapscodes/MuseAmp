@@ -48,7 +48,7 @@ class Worker(QObject):
     def __init__(self, files, mode, lufs=None):
         super().__init__()
         self.files = files
-        self.mode = mode  # "analyze", "tag", or "delete" modes (TODO: replace "delete" with 'apply' once i'm sure things are working)
+        self.mode = mode  # "analyze", "tag", or "delete" modes
         self.lufs = lufs
 
     #runner for worker thread
@@ -86,7 +86,7 @@ class Worker(QObject):
                     emit_partial_update()
                     continue
                 #build rsgain command to apply ReplayGain tag
-                # self.lufs is expected to be an int between 5 and 30
+                #self.lufs is expected to be an int between 5 and 30
                 lufs_str = f"-{abs(int(self.lufs))}" if self.lufs is not None else "-18"
                 loudness_val = "-"
                 replaygain_val = "-"
@@ -127,7 +127,7 @@ class Worker(QObject):
                 processed += 1
                 emit_progress()
                 emit_partial_update()
-            # skip the analyze phase, just emit the updates
+            #skip the analyze phase, just emit the updates
             self.finished.emit(updates, error_logs)
             return
         #delete mode: remove ReplayGain tags from files
@@ -270,8 +270,8 @@ class AddFilesWorker(QObject):
         self.finished.emit(updates, error_logs)
 
 class ApplyGainWorker(QObject):
-    finished = Signal(list, list)  # error_logs, analysis_results
-    progress = Signal(int)   # percent
+    finished = Signal(list, list)  #error_logs, analysis_results
+    progress = Signal(int)   #percent
 
     def __init__(self, files, lufs, table, supported_filetypes):
         super().__init__()
@@ -283,12 +283,12 @@ class ApplyGainWorker(QObject):
     def run(self):
         error_logs = []
         total = len(self.files)
-        # Apply gain as before
         for idx, file_path in enumerate(self.files):
             ext = Path(file_path).suffix.lower()
             if ext not in self.supported_filetypes:
                 continue
             lufs_str = f"-{abs(self.lufs)}"
+            #Tag with user LUFS to get gain value
             tag_cmd = [
                 "rsgain", "custom", "-s", "i", "-l", lufs_str, "-O", file_path
             ]
@@ -320,6 +320,7 @@ class ApplyGainWorker(QObject):
                 self.progress.emit(int((idx + 1) / total * 100))
                 continue
 
+            #apply gain using ffmpeg (in-place)
             try:
                 gain_db = float(gain_val)
             except Exception:
@@ -355,7 +356,7 @@ class ApplyGainWorker(QObject):
                     os.remove(tmp_file)
             self.progress.emit(int((idx + 1) / total * 100))
 
-        # Analyze files after gain applied
+        #analyze files after gain applied (for table update)
         analysis_results = []
         for idx, file_path in enumerate(self.files):
             loudness_val = "-"
@@ -367,7 +368,7 @@ class ApplyGainWorker(QObject):
                 continue
             try:
                 proc = subprocess.run(
-                    ["rsgain", "custom", "-O", file_path],
+                    ["rsgain", "custom", "-s", "i", "-l", lufs_str, "-O", file_path],
                     capture_output=True, text=True, check=False
                 )
                 output = proc.stdout
@@ -677,11 +678,12 @@ class AudioToolGUI(QWidget):
             QMessageBox.information(self, "Operation Complete", "Analysis and tagging have been completed.")
 
     def apply_gain_adjust(self):
+        #gather all file paths from the table
         files = [self.table.item(row, 0).text() for row in range(self.table.rowCount())]
         if not files:
             return
 
-        # Check if any files are mp3 and warn the user
+        #check if any files are mp3 and warn the user
         has_mp3 = any(Path(f).suffix.lower() == ".mp3" for f in files)
         if has_mp3:
             reply = QMessageBox.question(
@@ -694,18 +696,21 @@ class AudioToolGUI(QWidget):
             if reply != QMessageBox.Yes:
                 return
 
+        #get LUFS value from user input
         try:
             lufs = int(self.replaygain_input.text())
         except Exception:
             QMessageBox.warning(self, "Invalid LUFS", "Please enter a valid LUFS value.")
             return
 
+        #disable UI and reset progress bar and table columns for operation
         self.set_ui_enabled(False)
         self.set_progress(0)
         for row in range(self.table.rowCount()):
             self.table.setItem(row, 3, QTableWidgetItem("-"))
             self.table.setItem(row, 4, QTableWidgetItem("-"))
 
+        #start ApplyGainWorker in a background thread to keep UI responsive
         self.gain_worker_thread = QThread()
         self.gain_worker = ApplyGainWorker(files, lufs, self.table, supported_filetypes)
         self.gain_worker.moveToThread(self.gain_worker_thread)
@@ -718,16 +723,19 @@ class AudioToolGUI(QWidget):
         self.gain_worker_thread.start()
 
     def _on_apply_gain_finished(self, error_logs, analysis_results):
-        # Update table with new analysis results
+        #update the table with new analysis results after gain is applied
         for idx, loudness_val, replaygain_val, clipping_val in analysis_results:
             self.table.setItem(idx, 2, QTableWidgetItem(loudness_val))
             self.table.setItem(idx, 3, QTableWidgetItem(replaygain_val))
             self.table.setItem(idx, 4, QTableWidgetItem(clipping_val))
+        #re-enable UI and set progress to 100%
         self.set_ui_enabled(True)
         self.set_progress(100)
+        #show error log dialog if there were any errors
         if error_logs:
             dlg = ErrorLogDialog("\n\n".join(error_logs), self)
             dlg.exec()
+        #inform the user that the operation is complete
         QMessageBox.information(self, "Operation Complete", "Gain has been applied to all files.")
 
 #actually load and run app
