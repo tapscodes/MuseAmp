@@ -15,6 +15,7 @@ Some other commonly used values are -14 LUFS by Spotify, Amazon Music, and YouTu
 ## Project Status
 -Supports .mp3 and .flac files which are proper mp3s and flacs, still bad at handling improper flac files (poorly converted ones), will look into that further later
 -Analyze & Tag still has 2 popup confirmation windows, will need to fix later
+-Fix App Icon/Logo on Linux distros like Fedora
 
 ## Dependancies
 -FFmpeg [Download] (https://ffmpeg.org/) to apply gain to files
