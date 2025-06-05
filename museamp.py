@@ -58,9 +58,6 @@ class Worker(QObject):
         total = len(self.files)
         processed = 0
 
-        # Store commands for display
-        self.ran_commands = []
-
         #helper to update progress bar
         def emit_progress():
             percent = int((processed / total) * 100) if total else 100
@@ -99,7 +96,6 @@ class Worker(QObject):
                     "-O",
                     f'"{file_path}"'  # add quotes around file path
                 ]
-                self.ran_commands.append(" ".join([str(x) for x in cmd]))
                 loudness_val = "-"
                 replaygain_val = "-"
                 clipping_val = "-"
@@ -160,7 +156,6 @@ class Worker(QObject):
                     "-O",
                     f'"{file_path}"'  # add quotes around file path
                 ]
-                self.ran_commands.append(" ".join([str(x) for x in cmd]))
                 try:
                     proc = subprocess.run(
                         ["rsgain", "custom", "-s", "d", "-O", file_path],
@@ -191,7 +186,6 @@ class Worker(QObject):
                     "-O",
                     f'"{file_path}"'  # add quotes around file path
                 ]
-                self.ran_commands.append(" ".join([str(x) for x in cmd]))
                 try:
                     proc = subprocess.run(
                         ["rsgain", "custom", "-O", file_path],
@@ -362,7 +356,6 @@ class AudioToolGUI(QWidget):
         self.add_folder_btn.clicked.connect(self.add_folder)
         self.remove_files_btn.clicked.connect(self.remove_files)
         self.replaygain_btn.clicked.connect(self.analyze_and_tag)
-        self.gain_btn.clicked.connect(self.apply_gain_remove_rg)  # add handler for Apply Gain
 
     #add files to table/list
     def add_files(self):
@@ -572,45 +565,6 @@ class AudioToolGUI(QWidget):
                 dlg = ErrorLogDialog("\n\n".join(error_logs), self)
                 dlg.exec()
             QMessageBox.information(self, "Operation Complete", "Analysis and tagging have been completed.")
-            # Show ran commands in a popup after operation complete
-            if hasattr(self.worker, "ran_commands") and self.worker.ran_commands:
-                dlg = ErrorLogDialog("Commands run:\n\n" + "\n".join(self.worker.ran_commands), self)
-                dlg.exec()
-
-    def apply_gain_remove_rg(self):
-        files = [self.table.item(row, 0).text() for row in range(self.table.rowCount())]
-        if not files:
-            return
-        self.set_ui_enabled(False)
-        self.set_progress(0)
-        error_logs = []
-        for idx, file_path in enumerate(files):
-            ext = Path(file_path).suffix.lower()
-            if ext not in supported_filetypes:
-                continue
-            cmd = [
-                "rsgain",
-                "custom",
-                "-s", "d",
-                "-O",
-                file_path
-            ]
-            try:
-                proc = subprocess.run(cmd, capture_output=True, text=True, check=False)
-                if proc.returncode != 0:
-                    error_logs.append(f"{file_path}:\n{proc.stderr or proc.stdout}")
-            except Exception as e:
-                error_logs.append(f"{file_path}: {str(e)}")
-            # Set ReplayGain and Clipping columns to "-"
-            self.table.setItem(idx, 3, QTableWidgetItem("-"))
-            self.table.setItem(idx, 4, QTableWidgetItem("-"))
-            self.set_progress(int((idx + 1) / len(files) * 100))
-        self.set_ui_enabled(True)
-        self.set_progress(100)
-        if error_logs:
-            dlg = ErrorLogDialog("\n\n".join(error_logs), self)
-            dlg.exec()
-        QMessageBox.information(self, "Operation Complete", "ReplayGain tags deleted for all files.")
 
 #actually load and run app
 if __name__ == "__main__":
