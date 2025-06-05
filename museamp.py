@@ -332,7 +332,7 @@ class AudioToolGUI(QWidget):
         for file_path in files:
             if not self.is_already_listed(file_path):
                 files_to_add.append(file_path)
-        #insert rows now, update after worker
+        #insert rows now, do not scan yet, just set "-" for columns
         start_row = self.table.rowCount()
         for file_path in files_to_add:
             row = self.table.rowCount()
@@ -342,10 +342,8 @@ class AudioToolGUI(QWidget):
             self.table.setItem(row, 2, QTableWidgetItem("-"))
             self.table.setItem(row, 3, QTableWidgetItem("-"))
             self.table.setItem(row, 4, QTableWidgetItem("-"))
-        if not files_to_add:
-            self.set_ui_enabled(True)
-            self.set_progress(100)
-            return
+        self.set_ui_enabled(True)
+        self.set_progress(100)
         #start worker to scan tags and update table
         self.add_worker_thread = QThread()
         self.add_worker = AddFilesWorker(files_to_add)
@@ -385,7 +383,7 @@ class AudioToolGUI(QWidget):
                 path = Path(root) / filename
                 if path.suffix.lower() in supported_filetypes and not self.is_already_listed(str(path)):
                     files_to_add.append(str(path))
-        #insert items into rows now
+        #insert items into rows now, do not scan yet, just set "-" for columns
         start_row = self.table.rowCount()
         for file_path in files_to_add:
             row = self.table.rowCount()
@@ -395,10 +393,8 @@ class AudioToolGUI(QWidget):
             self.table.setItem(row, 2, QTableWidgetItem("-"))
             self.table.setItem(row, 3, QTableWidgetItem("-"))
             self.table.setItem(row, 4, QTableWidgetItem("-"))
-        if not files_to_add:
-            self.set_ui_enabled(True)
-            self.set_progress(100)
-            return
+        self.set_ui_enabled(True)
+        self.set_progress(100)
         #start worker to scan tags and update table
         self.add_worker_thread = QThread()
         self.add_worker = AddFilesWorker(files_to_add)
