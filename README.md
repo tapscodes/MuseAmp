@@ -8,7 +8,6 @@ TODO: write this later
 TODO: write this later
 
 ## Project Status
--Apply Gain button is attempting to delete replaygain tags atm to help with testing, will be applying actual gain to files later.
 -Supports .mp3 and .flac files which are proper mp3s and flacs, still bad at handling improper flac files (poorly converted ones), will look into that further later
 -Analyze & Tag still has 2 popup confirmation windows, will need to fix later
 
