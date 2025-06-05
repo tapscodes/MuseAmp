@@ -274,7 +274,7 @@ class AudioToolGUI(QWidget):
         self.add_folder_btn = QPushButton("Add Folder")
         self.remove_files_btn = QPushButton("Remove File(s)")
         self.gain_btn = QPushButton("Apply Gain")
-        self.replaygain_btn = QPushButton("Analyze & Tag")
+        self.replaygain_btn = QPushButton("Analyze && Tag")
 
         #textbox for replaygain value input
         self.replaygain_input = QLineEdit()
