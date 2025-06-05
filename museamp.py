@@ -74,7 +74,7 @@ class Worker(QObject):
                     partial.append(updates[i])
                 else:
                     partial.append((i, "-", "-", "-"))
-            self.finished.emit(partial, [])  #no error_logs for partial completion
+            self.finished.emit(partial, [])
 
         #tag mode: apply ReplayGain tags to files
         if self.mode == "tag":
@@ -515,6 +515,7 @@ class AudioToolGUI(QWidget):
             return
         if has_existing_rg:
             QMessageBox.warning(self, "WARNING", "WARNING: ReplayGain tag will be overwritten")
+        #get user input for LUFS from textbox
         try:
             lufs = int(self.replaygain_input.text())
         except Exception:
@@ -528,6 +529,7 @@ class AudioToolGUI(QWidget):
             self.table.setItem(row, 4, QTableWidgetItem("-"))
 
         self.worker_thread = QThread()
+        #pass user input LUFS to Worker
         self.worker = Worker(files, "tag", lufs)
         self.worker.moveToThread(self.worker_thread)
         self.worker_thread.started.connect(self.worker.run)
