@@ -10,8 +10,6 @@ TODO: write this later
 ## Project Status
 -Apply Gain button is attempting to delete replaygain tags atm to help with testing, will be applying actual gain to files later.
 -Supports .mp3 and .flac files which are proper mp3s and flacs, still bad at handling improper flac files (poorly converted ones), will look into that further later
--2 popups happen after replaygain is applied, will need to look into why
--ReplayGain always targets -18 LUFS regardless of user input at the moment, will need to ensure that user input is properly handled
 
 ## Dependancies
 -RSGain [Download](https://github.com/complexlogic/rsgain) for audio analysis

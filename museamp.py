@@ -58,6 +58,9 @@ class Worker(QObject):
         total = len(self.files)
         processed = 0
 
+        # Store commands for display
+        self.ran_commands = []
+
         #helper to update progress bar
         def emit_progress():
             percent = int((processed / total) * 100) if total else 100
@@ -67,7 +70,6 @@ class Worker(QObject):
 
         #helper to update table after each file
         def emit_partial_update():
-            #emit a copy of updates so far, with "-" for unfinished rows
             partial = []
             for i in range(total):
                 if i < len(updates):
@@ -87,24 +89,59 @@ class Worker(QObject):
                     emit_partial_update()
                     continue
                 #build rsgain command to apply ReplayGain tag
+                # self.lufs is expected to be an int between 5 and 30
+                lufs_str = f"-{abs(int(self.lufs))}" if self.lufs is not None else "-18"
                 cmd = [
-                    "rsgain",   #call rsgain cli tool
-                    "custom",   #use custom mode for flexible tagging
-                    "-s", "i",  #set tag mode to 'i' (scan and write ReplayGain 2.0 tags)
-                    "-l", str(self.lufs),   #set target loudness to user input (LUFS)
-                    "-O",   #output in tabular format
-                    file_path   #target file path
+                    "rsgain",
+                    "custom",
+                    "-s", "i",
+                    "-l", lufs_str,
+                    "-O",
+                    f'"{file_path}"'  # add quotes around file path
                 ]
+                self.ran_commands.append(" ".join([str(x) for x in cmd]))
+                loudness_val = "-"
+                replaygain_val = "-"
+                clipping_val = "-"
                 try:
-                    proc = subprocess.run(cmd, capture_output=True, text=True, check=False)
-                    if proc.returncode != 0:
+                    proc = subprocess.run(
+                        ["rsgain", "custom", "-s", "i", "-l", lufs_str, "-O", file_path],
+                        capture_output=True, text=True, check=False
+                    )
+                    output = proc.stdout
+                    if proc.returncode == 0:
+                        lines = output.strip().splitlines()
+                        if len(lines) >= 2:
+                            header = lines[0].split('\t')
+                            values = lines[1].split('\t')
+                            colmap = {k: i for i, k in enumerate(header)}
+                            lufs = values[colmap.get("Loudness (LUFS)", -1)] if "Loudness (LUFS)" in colmap else "-"
+                            gain = values[colmap.get("Gain (dB)", -1)] if "Gain (dB)" in colmap else "-"
+                            if lufs != "-":
+                                loudness_val = f"{lufs} LUFS"
+                            if gain != "-":
+                                replaygain_val = gain
+                            #clipping: check "Clipping" or "Clipping Adjustment?" column from rsgain
+                            clip_idx = colmap.get("Clipping", colmap.get("Clipping Adjustment?", -1))
+                            if clip_idx != -1:
+                                clip_val = values[clip_idx]
+                                if clip_val.strip().upper() in ("Y", "YES"):
+                                    clipping_val = "Yes"
+                                elif clip_val.strip().upper() in ("N", "NO"):
+                                    clipping_val = "No"
+                                else:
+                                    clipping_val = clip_val
+                    else:
                         error_logs.append(f"{file_path}:\n{proc.stderr or proc.stdout}")
                 except Exception as e:
                     error_logs.append(f"{file_path}: {str(e)}")
+                updates.append((row, loudness_val, replaygain_val, clipping_val))
                 processed += 1
                 emit_progress()
                 emit_partial_update()
-            mode = "analyze"
+            # skip the analyze phase, just emit the updates
+            self.finished.emit(updates, error_logs)
+            return
         #delete mode: remove ReplayGain tags from files
         elif self.mode == "delete":
             for row, file_path in enumerate(self.files):
@@ -117,14 +154,18 @@ class Worker(QObject):
                     continue
                 #build rsgain command to delete ReplayGain tags
                 cmd = [
-                    "rsgain",   #call rsgain cli tool
-                    "custom",   #use custom mode for flexible tagging
-                    "-s", "d",  #set tag mode to 'd' (delete ReplayGain tags)
-                    "-O",   #output in tabular format
-                    file_path   #target file path
+                    "rsgain",
+                    "custom",
+                    "-s", "d",
+                    "-O",
+                    f'"{file_path}"'  # add quotes around file path
                 ]
+                self.ran_commands.append(" ".join([str(x) for x in cmd]))
                 try:
-                    proc = subprocess.run(cmd, capture_output=True, text=True, check=False)
+                    proc = subprocess.run(
+                        ["rsgain", "custom", "-s", "d", "-O", file_path],
+                        capture_output=True, text=True, check=False
+                    )
                     if proc.returncode != 0:
                         error_logs.append(f"{file_path}:\n{proc.stderr or proc.stdout}")
                 except Exception as e:
@@ -144,15 +185,18 @@ class Worker(QObject):
                 loudness_val = "-"
                 replaygain_val = "-"
                 clipping_val = "-"
+                cmd = [
+                    "rsgain",
+                    "custom",
+                    "-O",
+                    f'"{file_path}"'  # add quotes around file path
+                ]
+                self.ran_commands.append(" ".join([str(x) for x in cmd]))
                 try:
-                    #build rsgain command to scan file for info
-                    cmd = [
-                        "rsgain",   #call rsgain cli tool
-                        "custom",   #use custom mode for flexible output
-                        "-O",   #output in tabular format
-                        file_path   #target file path
-                    ]
-                    proc = subprocess.run(cmd, capture_output=True, text=True, check=False)
+                    proc = subprocess.run(
+                        ["rsgain", "custom", "-O", file_path],
+                        capture_output=True, text=True, check=False
+                    )
                     output = proc.stdout
                     if proc.returncode == 0:
                         lines = output.strip().splitlines()
@@ -279,11 +323,11 @@ class AudioToolGUI(QWidget):
         #textbox for replaygain value input
         self.replaygain_input = QLineEdit()
         self.replaygain_input.setFixedWidth(50)           #fix width for neatness
-        self.replaygain_input.setText("-18")              #default ReplayGain 2.0 LUFS value
-        self.replaygain_input.setValidator(QIntValidator(-30, -5, self))  #allow only -30 to -5 LUFS
+        self.replaygain_input.setText("18")               #default ReplayGain 2.0 LUFS value (positive version)
+        self.replaygain_input.setValidator(QIntValidator(5, 30, self))  #allow only 5 to 30
 
         #label for replaygain input
-        self.replaygain_label = QLabel("Target ReplayGain LUFS:")
+        self.replaygain_label = QLabel("Target LUFS: -")
 
         #layout for replaygain label + input
         self.replaygain_layout = QHBoxLayout()
@@ -528,6 +572,10 @@ class AudioToolGUI(QWidget):
                 dlg = ErrorLogDialog("\n\n".join(error_logs), self)
                 dlg.exec()
             QMessageBox.information(self, "Operation Complete", "Analysis and tagging have been completed.")
+            # Show ran commands in a popup after operation complete
+            if hasattr(self.worker, "ran_commands") and self.worker.ran_commands:
+                dlg = ErrorLogDialog("Commands run:\n\n" + "\n".join(self.worker.ran_commands), self)
+                dlg.exec()
 
     def apply_gain_remove_rg(self):
         files = [self.table.item(row, 0).text() for row in range(self.table.rowCount())]
