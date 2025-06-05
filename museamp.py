@@ -305,7 +305,7 @@ class AudioToolGUI(QWidget):
         self.table.setHorizontalHeaderLabels(["File Path", "Extension", "File Loudness", "ReplayGain", "Clipping"])
         self.table.setEditTriggers(QAbstractItemView.NoEditTriggers)    #make cells read-only
         self.table.setSelectionBehavior(QAbstractItemView.SelectRows)   #select entire rows
-        self.table.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)  #stretch first column
+        self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Interactive) #let user resize columns
 
         #buttons
         self.add_files_btn = QPushButton("Add File(s)")
@@ -316,8 +316,8 @@ class AudioToolGUI(QWidget):
 
         #textbox for replaygain value input
         self.replaygain_input = QLineEdit()
-        self.replaygain_input.setFixedWidth(50)           #fix width for neatness
-        self.replaygain_input.setText("18")               #default ReplayGain 2.0 LUFS value (positive version)
+        self.replaygain_input.setFixedWidth(50) #fix width for neatness
+        self.replaygain_input.setText("18") #default ReplayGain 2.0 LUFS value (positive version)
         self.replaygain_input.setValidator(QIntValidator(5, 30, self))  #allow only 5 to 30
 
         #label for replaygain input
