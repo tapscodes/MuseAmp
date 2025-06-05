@@ -45,10 +45,9 @@ class Worker(QObject):
     finished = Signal(list, list)   #updates, error_logs
     progress = Signal(int)  #percent complete
 
-    def __init__(self, files, mode, lufs=None):
+    def __init__(self, files, lufs=None):
         super().__init__()
         self.files = files
-        self.mode = mode  # "analyze", "tag", or "delete" modes
         self.lufs = lufs
 
     #runner for worker thread
@@ -75,135 +74,63 @@ class Worker(QObject):
                     partial.append((i, "-", "-", "-"))
             self.finished.emit(partial, [])
 
-        #tag mode: apply ReplayGain tags to files
-        if self.mode == "tag":
-            for row, file_path in enumerate(self.files):
-                ext = Path(file_path).suffix.lower()
-                if ext not in supported_filetypes:
-                    updates.append((row, "-", "-", "-"))
-                    processed += 1
-                    emit_progress()
-                    emit_partial_update()
-                    continue
-                #build rsgain command to apply ReplayGain tag
-                #self.lufs is expected to be an int between 5 and 30
-                lufs_str = f"-{abs(int(self.lufs))}" if self.lufs is not None else "-18"
-                loudness_val = "-"
-                replaygain_val = "-"
-                clipping_val = "-"
-                #use -S if user chose not to overwrite
-                rsgain_cmd = [
-                    "rsgain", "custom", "-s", "i", "-l", lufs_str, "-O", file_path
-                ]
-                if hasattr(self, "overwrite_rg") and not self.overwrite_rg:
-                    rsgain_cmd.insert(2, "-S")
-                try:
-                    proc = subprocess.run(
-                        rsgain_cmd,
-                        capture_output=True, text=True, check=False
-                    )
-                    output = proc.stdout
-                    if proc.returncode == 0:
-                        lines = output.strip().splitlines()
-                        if len(lines) >= 2:
-                            header = lines[0].split('\t')
-                            values = lines[1].split('\t')
-                            colmap = {k: i for i, k in enumerate(header)}
-                            lufs = values[colmap.get("Loudness (LUFS)", -1)] if "Loudness (LUFS)" in colmap else "-"
-                            gain = values[colmap.get("Gain (dB)", -1)] if "Gain (dB)" in colmap else "-"
-                            if lufs != "-":
-                                loudness_val = f"{lufs} LUFS"
-                            if gain != "-":
-                                replaygain_val = gain
-                            #clipping: check "Clipping" or "Clipping Adjustment?" column from rsgain
-                            clip_idx = colmap.get("Clipping", colmap.get("Clipping Adjustment?", -1))
-                            if clip_idx != -1:
-                                clip_val = values[clip_idx]
-                                if clip_val.strip().upper() in ("Y", "YES"):
-                                    clipping_val = "Yes"
-                                elif clip_val.strip().upper() in ("N", "NO"):
-                                    clipping_val = "No"
-                                else:
-                                    clipping_val = clip_val
-                    else:
-                        error_logs.append(f"{file_path}:\n{proc.stderr or proc.stdout}")
-                except Exception as e:
-                    error_logs.append(f"{file_path}: {str(e)}")
-                updates.append((row, loudness_val, replaygain_val, clipping_val))
+        # Only tag mode remains
+        for row, file_path in enumerate(self.files):
+            ext = Path(file_path).suffix.lower()
+            if ext not in supported_filetypes:
+                updates.append((row, "-", "-", "-"))
                 processed += 1
                 emit_progress()
                 emit_partial_update()
-            #skip the analyze phase, just emit the updates
-            self.finished.emit(updates, error_logs)
-            return
-        #delete mode: remove ReplayGain tags from files
-        elif self.mode == "delete":
-            for row, file_path in enumerate(self.files):
-                ext = Path(file_path).suffix.lower()
-                if ext not in supported_filetypes:
-                    updates.append((row, "-", "-", "-"))
-                    processed += 1
-                    emit_progress()
-                    emit_partial_update()
-                    continue
-                try:
-                    proc = subprocess.run(
-                        ["rsgain", "custom", "-s", "d", "-O", file_path],
-                        capture_output=True, text=True, check=False
-                    )
-                    if proc.returncode != 0:
-                        error_logs.append(f"{file_path}:\n{proc.stderr or proc.stdout}")
-                except Exception as e:
-                    error_logs.append(f"{file_path}: {str(e)}")
-                processed += 1
-                emit_progress()
-                emit_partial_update()
-            mode = "analyze"
-        else:
-            mode = "analyze"
-
-        #analyze mode: scan files for ReplayGain/loudness/clipping info
-        if mode == "analyze":
-            processed = 0  #reset for analysis phase
-            updates.clear()
-            for row, file_path in enumerate(self.files):
-                loudness_val = "-"
-                replaygain_val = "-"
-                clipping_val = "-"
-                try:
-                    proc = subprocess.run(
-                        ["rsgain", "custom", "-O", file_path],
-                        capture_output=True, text=True, check=False
-                    )
-                    output = proc.stdout
-                    if proc.returncode == 0:
-                        lines = output.strip().splitlines()
-                        if len(lines) >= 2:
-                            header = lines[0].split('\t')
-                            values = lines[1].split('\t')
-                            colmap = {k: i for i, k in enumerate(header)}
-                            lufs = values[colmap.get("Loudness (LUFS)", -1)] if "Loudness (LUFS)" in colmap else "-"
-                            gain = values[colmap.get("Gain (dB)", -1)] if "Gain (dB)" in colmap else "-"
-                            if lufs != "-":
-                                loudness_val = f"{lufs} LUFS"
-                            if gain != "-":
-                                replaygain_val = gain
-                            #clipping: check "Clipping" or "Clipping Adjustment?" column from rsgain
-                            clip_idx = colmap.get("Clipping", colmap.get("Clipping Adjustment?", -1))
-                            if clip_idx != -1:
-                                clip_val = values[clip_idx]
-                                if clip_val.strip().upper() in ("Y", "YES"):
-                                    clipping_val = "Yes"
-                                elif clip_val.strip().upper() in ("N", "NO"):
-                                    clipping_val = "No"
-                                else:
-                                    clipping_val = clip_val
-                except Exception:
-                    pass
-                updates.append((row, loudness_val, replaygain_val, clipping_val))
-                processed += 1
-                emit_progress()
-                emit_partial_update()
+                continue
+            #build rsgain command to apply ReplayGain tag
+            #self.lufs is expected to be an int between 5 and 30
+            lufs_str = f"-{abs(int(self.lufs))}" if self.lufs is not None else "-18"
+            loudness_val = "-"
+            replaygain_val = "-"
+            clipping_val = "-"
+            #use -S if user chose not to overwrite
+            rsgain_cmd = [
+                "rsgain", "custom", "-s", "i", "-l", lufs_str, "-O", file_path
+            ]
+            if hasattr(self, "overwrite_rg") and not self.overwrite_rg:
+                rsgain_cmd.insert(2, "-S")
+            try:
+                proc = subprocess.run(
+                    rsgain_cmd,
+                    capture_output=True, text=True, check=False
+                )
+                output = proc.stdout
+                if proc.returncode == 0:
+                    lines = output.strip().splitlines()
+                    if len(lines) >= 2:
+                        header = lines[0].split('\t')
+                        values = lines[1].split('\t')
+                        colmap = {k: i for i, k in enumerate(header)}
+                        lufs = values[colmap.get("Loudness (LUFS)", -1)] if "Loudness (LUFS)" in colmap else "-"
+                        gain = values[colmap.get("Gain (dB)", -1)] if "Gain (dB)" in colmap else "-"
+                        if lufs != "-":
+                            loudness_val = f"{lufs} LUFS"
+                        if gain != "-":
+                            replaygain_val = gain
+                        #clipping: check "Clipping" or "Clipping Adjustment?" column from rsgain
+                        clip_idx = colmap.get("Clipping", colmap.get("Clipping Adjustment?", -1))
+                        if clip_idx != -1:
+                            clip_val = values[clip_idx]
+                            if clip_val.strip().upper() in ("Y", "YES"):
+                                clipping_val = "Yes"
+                            elif clip_val.strip().upper() in ("N", "NO"):
+                                clipping_val = "No"
+                            else:
+                                clipping_val = clip_val
+                else:
+                    error_logs.append(f"{file_path}:\n{proc.stderr or proc.stdout}")
+            except Exception as e:
+                error_logs.append(f"{file_path}: {str(e)}")
+            updates.append((row, loudness_val, replaygain_val, clipping_val))
+            processed += 1
+            emit_progress()
+            emit_partial_update()
         self.finished.emit(updates, error_logs)
 
 #worker for adding files/folders
@@ -631,12 +558,8 @@ class AudioToolGUI(QWidget):
     #analyze and tag files (ReplayGain)
     def analyze_and_tag(self):
         files = []
-        has_existing_rg = False
         for row in range(self.table.rowCount()):
             files.append(self.table.item(row, 0).text())
-            rg_val = self.table.item(row, 3)
-            if rg_val and rg_val.text() != "-":
-                has_existing_rg = True
         if not files:
             QMessageBox.information(self, "No Files", "No files to analyze.")
             return
@@ -669,7 +592,7 @@ class AudioToolGUI(QWidget):
             self.table.setItem(row, 4, QTableWidgetItem("-"))
 
         self.worker_thread = QThread()
-        self.worker = Worker(files, "tag", lufs)
+        self.worker = Worker(files, lufs)
         self.worker.overwrite_rg = True
         self.worker.moveToThread(self.worker_thread)
         self.worker_thread.started.connect(self.worker.run)
