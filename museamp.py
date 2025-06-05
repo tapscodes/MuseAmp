@@ -88,14 +88,6 @@ class Worker(QObject):
                 #build rsgain command to apply ReplayGain tag
                 # self.lufs is expected to be an int between 5 and 30
                 lufs_str = f"-{abs(int(self.lufs))}" if self.lufs is not None else "-18"
-                cmd = [
-                    "rsgain",
-                    "custom",
-                    "-s", "i",
-                    "-l", lufs_str,
-                    "-O",
-                    f'"{file_path}"'  # add quotes around file path
-                ]
                 loudness_val = "-"
                 replaygain_val = "-"
                 clipping_val = "-"
@@ -148,14 +140,6 @@ class Worker(QObject):
                     emit_progress()
                     emit_partial_update()
                     continue
-                #build rsgain command to delete ReplayGain tags
-                cmd = [
-                    "rsgain",
-                    "custom",
-                    "-s", "d",
-                    "-O",
-                    f'"{file_path}"'  # add quotes around file path
-                ]
                 try:
                     proc = subprocess.run(
                         ["rsgain", "custom", "-s", "d", "-O", file_path],
@@ -180,12 +164,6 @@ class Worker(QObject):
                 loudness_val = "-"
                 replaygain_val = "-"
                 clipping_val = "-"
-                cmd = [
-                    "rsgain",
-                    "custom",
-                    "-O",
-                    f'"{file_path}"'  # add quotes around file path
-                ]
                 try:
                     proc = subprocess.run(
                         ["rsgain", "custom", "-O", file_path],
@@ -585,6 +563,100 @@ class AudioToolGUI(QWidget):
             )
             if reply != QMessageBox.Yes:
                 return
+
+        self.set_ui_enabled(False)
+        self.set_progress(0)
+        error_logs = []
+        for idx, file_path in enumerate(files):
+            ext = Path(file_path).suffix.lower()
+            if ext not in supported_filetypes:
+                continue
+
+            # Step 1: Analyze & set ReplayGain tags (same as analyze_and_tag)
+            try:
+                lufs = int(self.replaygain_input.text())
+            except Exception:
+                error_logs.append(f"{file_path}: Invalid LUFS value.")
+                self.set_progress(int((idx + 1) / len(files) * 100))
+                continue
+            lufs_str = f"-{abs(lufs)}"
+            tag_cmd = [
+                "rsgain", "custom", "-s", "i", "-l", lufs_str, "-O", file_path
+            ]
+            gain_val = None
+            try:
+                proc_tag = subprocess.run(tag_cmd, capture_output=True, text=True, check=False)
+                if proc_tag.returncode != 0:
+                    error_logs.append(f"{file_path} (tag):\n{proc_tag.stderr or proc_tag.stdout}")
+                    self.set_progress(int((idx + 1) / len(files) * 100))
+                    continue
+                # Use output from tagging step to get gain value
+                output = proc_tag.stdout
+                lines = output.strip().splitlines()
+                if len(lines) >= 2:
+                    header = lines[0].split('\t')
+                    values = lines[1].split('\t')
+                    colmap = {k: i for i, k in enumerate(header)}
+                    # Defensive: check colmap and values length
+                    gain_idx = colmap.get("Gain (dB)", -1)
+                    if gain_idx != -1 and gain_idx < len(values):
+                        gain_val = values[gain_idx]
+                    else:
+                        gain_val = None
+            except Exception as e:
+                error_logs.append(f"{file_path} (tag): {str(e)}")
+                self.set_progress(int((idx + 1) / len(files) * 100))
+                continue
+
+            if gain_val is None or gain_val == "-":
+                error_logs.append(f"{file_path}: Could not determine ReplayGain value.")
+                self.set_progress(int((idx + 1) / len(files) * 100))
+                continue
+
+            # Step 2: Apply gain using ffmpeg (in-place)
+            try:
+                gain_db = float(gain_val)
+            except Exception:
+                error_logs.append(f"{file_path}: Invalid gain value '{gain_val}'.")
+                self.set_progress(int((idx + 1) / len(files) * 100))
+                continue
+
+            tmp_file = str(Path(file_path).with_suffix(f".gain_tmp{ext}"))
+            ffmpeg_cmd = [
+                "ffmpeg", "-y", "-i", file_path,
+                "-map_metadata", "0", "-map", "0",
+                "-af", f"volume={gain_db}dB",
+                "-c:v", "copy"
+            ]
+            if ext == ".mp3":
+                ffmpeg_cmd += ["-c:a", "libmp3lame"]
+            elif ext == ".flac":
+                ffmpeg_cmd += ["-c:a", "flac"]
+            ffmpeg_cmd.append(tmp_file)
+
+            try:
+                proc_ffmpeg = subprocess.run(ffmpeg_cmd, capture_output=True, text=True, check=False)
+                if proc_ffmpeg.returncode != 0:
+                    error_logs.append(f"{file_path} (ffmpeg):\n{proc_ffmpeg.stderr or proc_ffmpeg.stdout}")
+                    if os.path.exists(tmp_file):
+                        os.remove(tmp_file)
+                    self.set_progress(int((idx + 1) / len(files) * 100))
+                    continue
+                os.replace(tmp_file, file_path)
+            except Exception as e:
+                error_logs.append(f"{file_path} (ffmpeg): {str(e)}")
+                if os.path.exists(tmp_file):
+                    os.remove(tmp_file)
+            self.table.setItem(idx, 3, QTableWidgetItem("-"))
+            self.table.setItem(idx, 4, QTableWidgetItem("-"))
+            self.set_progress(int((idx + 1) / len(files) * 100))
+
+        self.set_ui_enabled(True)
+        self.set_progress(100)
+        if error_logs:
+            dlg = ErrorLogDialog("\n\n".join(error_logs), self)
+            dlg.exec()
+        QMessageBox.information(self, "Operation Complete", "Gain has been applied to all files.")
 
 #actually load and run app
 if __name__ == "__main__":
