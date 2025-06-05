@@ -91,9 +91,15 @@ class Worker(QObject):
                 loudness_val = "-"
                 replaygain_val = "-"
                 clipping_val = "-"
+                #use -S if user chose not to overwrite
+                rsgain_cmd = [
+                    "rsgain", "custom", "-s", "i", "-l", lufs_str, "-O", file_path
+                ]
+                if hasattr(self, "overwrite_rg") and not self.overwrite_rg:
+                    rsgain_cmd.insert(2, "-S")
                 try:
                     proc = subprocess.run(
-                        ["rsgain", "custom", "-s", "i", "-l", lufs_str, "-O", file_path],
+                        rsgain_cmd,
                         capture_output=True, text=True, check=False
                     )
                     output = proc.stdout
@@ -634,8 +640,17 @@ class AudioToolGUI(QWidget):
         if not files:
             QMessageBox.information(self, "No Files", "No files to analyze.")
             return
-        if has_existing_rg:
-            QMessageBox.warning(self, "WARNING", "WARNING: ReplayGain tag will be overwritten")
+
+        #show the overwrite ReplayGain tags warning
+        reply = QMessageBox.question(
+            self,
+            "ReplayGain Tagging",
+            "Some files may already have ReplayGain tags. Overwrite existing tags?",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.Yes
+        )
+        overwrite = (reply == QMessageBox.Yes)
+
         #get user input for LUFS from textbox
         try:
             lufs = int(self.replaygain_input.text())
@@ -650,8 +665,8 @@ class AudioToolGUI(QWidget):
             self.table.setItem(row, 4, QTableWidgetItem("-"))
 
         self.worker_thread = QThread()
-        #pass user input LUFS to Worker
         self.worker = Worker(files, "tag", lufs)
+        self.worker.overwrite_rg = overwrite
         self.worker.moveToThread(self.worker_thread)
         self.worker_thread.started.connect(self.worker.run)
         self.worker.progress.connect(self.set_progress)
