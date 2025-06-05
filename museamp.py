@@ -306,6 +306,7 @@ class AudioToolGUI(QWidget):
         self.table.setEditTriggers(QAbstractItemView.NoEditTriggers)    #make cells read-only
         self.table.setSelectionBehavior(QAbstractItemView.SelectRows)   #select entire rows
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Interactive) #let user resize columns
+        self.table.horizontalHeader().setStretchLastSection(True) #stretch last column to fill space
 
         #buttons
         self.add_files_btn = QPushButton("Add File(s)")
