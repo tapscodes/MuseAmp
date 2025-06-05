@@ -682,20 +682,18 @@ class AudioToolGUI(QWidget):
 
     #handle completion of analyze & tag worker
     def _on_worker_finished_tag(self, updates, error_logs):
-        #always re-enable UI and set progress to 100% after operation, even if nothing was updated
-        self.set_ui_enabled(True)
-        self.set_progress(100)
         #only handle the final update (not partials)
         if not updates or not all(isinstance(u, tuple) for u in updates):
             return
-        #show error dialog if any errors
-        if error_logs:
-            dlg = ErrorLogDialog("\n\n".join(error_logs), self)
-            dlg.exec()
-        #show operation complete only once, not per-row
+        #only show popup if all rows are updated (not "-")
         all_done = all(isinstance(u, tuple) and all(x != "-" for x in u[1:]) for u in updates)
         self.update_table_with_worker(updates)
         if all_done:
+            self.set_ui_enabled(True)
+            self.set_progress(100)
+            if error_logs:
+                dlg = ErrorLogDialog("\n\n".join(error_logs), self)
+                dlg.exec()
             QMessageBox.information(self, "Operation Complete", "Analysis and tagging have been completed.")
 
     def apply_gain_adjust(self):
