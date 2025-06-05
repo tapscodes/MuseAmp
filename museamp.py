@@ -318,7 +318,6 @@ class AudioToolGUI(QWidget):
         self.add_folder_btn.clicked.connect(self.add_folder)
         self.remove_files_btn.clicked.connect(self.remove_files)
         self.replaygain_btn.clicked.connect(self.analyze_and_tag)
-        self.gain_btn.clicked.connect(self.apply_gain_zero)
 
     #add files to table/list
     def add_files(self):
@@ -528,42 +527,6 @@ class AudioToolGUI(QWidget):
                 dlg = ErrorLogDialog("\n\n".join(error_logs), self)
                 dlg.exec()
             QMessageBox.information(self, "Operation Complete", "Analysis and tagging have been completed.")
-
-    #delete ReplayGain tags from files
-    def apply_gain_zero(self):
-        files = [self.table.item(row, 0).text() for row in range(self.table.rowCount())]
-        self.set_ui_enabled(False)
-        self.set_progress(0)
-        #pre-emptively set empty values for ReplayGain and Clipping columns
-        for row in range(self.table.rowCount()):
-            self.table.setItem(row, 3, QTableWidgetItem("-"))
-            self.table.setItem(row, 4, QTableWidgetItem("-"))
-        #start worker to delete ReplayGain tags
-        self.worker_thread = QThread()
-        self.worker = Worker(files, "delete")
-        self.worker.moveToThread(self.worker_thread)
-        self.worker_thread.started.connect(self.worker.run)
-        self.worker.progress.connect(self.set_progress)
-        self.worker.finished.connect(self._on_worker_finished_delete)
-        self.worker.finished.connect(self.worker_thread.quit)
-        self.worker.finished.connect(self.worker.deleteLater)
-        self.worker_thread.finished.connect(self.worker_thread.deleteLater)
-        self.worker_thread.start()
-
-    #handle completion of delete ReplayGain tags worker
-    def _on_worker_finished_delete(self, updates, error_logs):
-        #only handle the final update (not partials)
-        if not updates or not all(isinstance(u, tuple) for u in updates):
-            return
-        all_done = all(isinstance(u, tuple) and all(x != "-" for x in u[1:]) for u in updates)
-        self.update_table_with_worker(updates)
-        if all_done:
-            self.set_ui_enabled(True)
-            self.set_progress(100)
-            if error_logs:
-                dlg = ErrorLogDialog("\n\n".join(error_logs), self)
-                dlg.exec()
-            QMessageBox.information(self, "Operation Complete", "ReplayGain tags deleted for all files.")
 
 #actually load and run app
 if __name__ == "__main__":
