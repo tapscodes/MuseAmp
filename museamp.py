@@ -356,6 +356,7 @@ class AudioToolGUI(QWidget):
         self.add_folder_btn.clicked.connect(self.add_folder)
         self.remove_files_btn.clicked.connect(self.remove_files)
         self.replaygain_btn.clicked.connect(self.analyze_and_tag)
+        self.gain_btn.clicked.connect(self.apply_gain_adjust)
 
     #add files to table/list
     def add_files(self):
@@ -565,6 +566,24 @@ class AudioToolGUI(QWidget):
                 dlg = ErrorLogDialog("\n\n".join(error_logs), self)
                 dlg.exec()
             QMessageBox.information(self, "Operation Complete", "Analysis and tagging have been completed.")
+
+    def apply_gain_adjust(self):
+        files = [self.table.item(row, 0).text() for row in range(self.table.rowCount())]
+        if not files:
+            return
+
+        # Check if any files are mp3 and warn the user
+        has_mp3 = any(Path(f).suffix.lower() == ".mp3" for f in files)
+        if has_mp3:
+            reply = QMessageBox.question(
+                self,
+                "Warning: MP3 Gain Application",
+                "Applying gain to MP3 files can irreversibly damage them, unlike FLAC files. Do you want to continue?",
+                QMessageBox.Yes | QMessageBox.No,
+                QMessageBox.No
+            )
+            if reply != QMessageBox.Yes:
+                return
 
 #actually load and run app
 if __name__ == "__main__":
