@@ -327,7 +327,6 @@ class AudioToolGUI(QWidget):
             return
         self.set_ui_enabled(False)
         self.set_progress(0)
-        #only add files not already listed
         files_to_add = []
         for file_path in files:
             if not self.is_already_listed(file_path):
@@ -344,17 +343,6 @@ class AudioToolGUI(QWidget):
             self.table.setItem(row, 4, QTableWidgetItem("-"))
         self.set_ui_enabled(True)
         self.set_progress(100)
-        #start worker to scan tags and update table
-        self.add_worker_thread = QThread()
-        self.add_worker = AddFilesWorker(files_to_add)
-        self.add_worker.moveToThread(self.add_worker_thread)
-        self.add_worker.progress.connect(self.set_progress)
-        self.add_worker.finished.connect(lambda updates, errors: self._on_add_files_finished(updates, errors, start_row))
-        self.add_worker.finished.connect(self.add_worker_thread.quit)
-        self.add_worker.finished.connect(self.add_worker.deleteLater)
-        self.add_worker_thread.finished.connect(self.add_worker_thread.deleteLater)
-        self.add_worker_thread.started.connect(self.add_worker.run)
-        self.add_worker_thread.start()
 
     #what to do when files are finished being added
     def _on_add_files_finished(self, updates, error_logs, start_row):
@@ -395,17 +383,6 @@ class AudioToolGUI(QWidget):
             self.table.setItem(row, 4, QTableWidgetItem("-"))
         self.set_ui_enabled(True)
         self.set_progress(100)
-        #start worker to scan tags and update table
-        self.add_worker_thread = QThread()
-        self.add_worker = AddFilesWorker(files_to_add)
-        self.add_worker.moveToThread(self.add_worker_thread)
-        self.add_worker.progress.connect(self.set_progress)
-        self.add_worker.finished.connect(lambda updates, errors: self._on_add_files_finished(updates, errors, start_row))
-        self.add_worker.finished.connect(self.add_worker_thread.quit)
-        self.add_worker.finished.connect(self.add_worker.deleteLater)
-        self.add_worker_thread.finished.connect(self.add_worker_thread.deleteLater)
-        self.add_worker_thread.started.connect(self.add_worker.run)
-        self.add_worker_thread.start()
 
     #actually add file to the table/list (used for single file add)
     def add_file_to_table(self, file_path):
