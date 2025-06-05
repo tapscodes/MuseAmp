@@ -318,6 +318,7 @@ class AudioToolGUI(QWidget):
         self.add_folder_btn.clicked.connect(self.add_folder)
         self.remove_files_btn.clicked.connect(self.remove_files)
         self.replaygain_btn.clicked.connect(self.analyze_and_tag)
+        self.gain_btn.clicked.connect(self.apply_gain_remove_rg)  # add handler for Apply Gain
 
     #add files to table/list
     def add_files(self):
@@ -527,6 +528,41 @@ class AudioToolGUI(QWidget):
                 dlg = ErrorLogDialog("\n\n".join(error_logs), self)
                 dlg.exec()
             QMessageBox.information(self, "Operation Complete", "Analysis and tagging have been completed.")
+
+    def apply_gain_remove_rg(self):
+        files = [self.table.item(row, 0).text() for row in range(self.table.rowCount())]
+        if not files:
+            return
+        self.set_ui_enabled(False)
+        self.set_progress(0)
+        error_logs = []
+        for idx, file_path in enumerate(files):
+            ext = Path(file_path).suffix.lower()
+            if ext not in supported_filetypes:
+                continue
+            cmd = [
+                "rsgain",
+                "custom",
+                "-s", "d",
+                "-O",
+                file_path
+            ]
+            try:
+                proc = subprocess.run(cmd, capture_output=True, text=True, check=False)
+                if proc.returncode != 0:
+                    error_logs.append(f"{file_path}:\n{proc.stderr or proc.stdout}")
+            except Exception as e:
+                error_logs.append(f"{file_path}: {str(e)}")
+            # Set ReplayGain and Clipping columns to "-"
+            self.table.setItem(idx, 3, QTableWidgetItem("-"))
+            self.table.setItem(idx, 4, QTableWidgetItem("-"))
+            self.set_progress(int((idx + 1) / len(files) * 100))
+        self.set_ui_enabled(True)
+        self.set_progress(100)
+        if error_logs:
+            dlg = ErrorLogDialog("\n\n".join(error_logs), self)
+            dlg.exec()
+        QMessageBox.information(self, "Operation Complete", "ReplayGain tags deleted for all files.")
 
 #actually load and run app
 if __name__ == "__main__":
