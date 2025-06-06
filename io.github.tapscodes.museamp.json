@@ -12,30 +12,6 @@
   ],
   "modules": [
     {
-      "name": "python3",
-      "buildsystem": "simple",
-      "build-commands": [],
-      "sources": []
-    },
-    {
-      "name": "ffmpeg",
-      "buildsystem": "meson",
-      "config-opts": [
-        "--enable-gpl",
-        "--enable-version3",
-        "--disable-static",
-        "--disable-debug",
-        "--disable-doc"
-      ],
-      "sources": [
-        {
-          "type": "archive",
-          "url": "https://ffmpeg.org/releases/ffmpeg-6.1.1.tar.xz",
-          "sha256": "e1e7b1e3e6e3c7b3e6e3c7b3e6e3c7b3e6e3c7b3e6e3c7b3e6e3c7b3e6e3c7b3"
-        }
-      ]
-    },
-    {
       "name": "python3-modules",
       "buildsystem": "simple",
       "build-commands": [
