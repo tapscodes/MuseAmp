@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.tapscodes.museamp</id>
+  
+  <name>MuseAmp</name>
+  <summary>Museamp (Music + Amplifier) is an audio level normalizer/amplifier that makes your audio files play at the same normalized level. It can either directly alter your audio files to amplify their native volume or simply apply a ReplayGain 2.0 standard tag to your files so your audio player of choice knows what audio level to play the audio at.</summary>
+  
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>BSD-3-Clause</project_license>
+  
+  <developer_name>tapscodes</developer_name>
+  <url type="homepage">https://github.com/tapscodes/Museamp</url>
+  <url type="bugtracker">https://github.com/tapscodes/Museamp/issues</url>
+  <url type="donation">https://github.com/tapscodes/Museamp</url>
+  <url type="help">https://github.com/tapscodes/Museamp#how-to-use</url>
+  <url type="translate">https://github.com/tapscodes/Museamp</url>
+  <url type="vcs-browser">https://github.com/tapscodes/Museamp</url>
+  <url type="contribute">https://github.com/tapscodes/Museamp</url>
+
+  <releases>
+    <release version="1.0.0" date="2025-06-05">
+      <description>
+        <p>Initial Flatpak release.</p>
+      </description>
+    </release>
+  </releases>
+  
+  <recommends>
+    <display_length compare="ge">400</display_length>
+  </recommends>
+  <supports>
+    <control>pointing</control>
+    <control>keyboard</control>
+    <control>touch</control>
+  </supports>
+  
+  <description>
+    <p>
+      Museamp (Music + Amplifier) is an audio level normalizer/amplifier that makes your audio files play at the same normalized level. <br>
+      It can either directly alter your audio files to amplify their native volume or simply apply a ReplayGain 2.0 standard tag to your files so your audio player of choice knows what audio level to play the audio at.
+    </p>
+    <ul>
+      <li>Supports .mp3 and .flac files</li>
+      <li>ReplayGain 2.0 tagging and direct gain adjustment</li>
+      <li>Batch processing and folder support</li>
+      <li>Modern PySide6(Qt) interface</li>
+    </ul>
+  </description>
+  
+  <launchable type="desktop-id">io.github.tapscodes.museamp.desktop</launchable>
+  <screenshots>
+    <screenshot type="default">
+      <image>https://github.com/tapscodes/Museamp/blob/main/screenshot1.jpg?raw=true</image>
+    </screenshot>
+    <screenshot>
+      <image>https://github.com/tapscodes/Museamp/blob/main/screenshot2.jpg?raw=true</image>
+    </screenshot>
+    <screenshot>
+      <image>https://github.com/tapscodes/Museamp/blob/main/screenshot3.jpg?raw=true</image>
+    </screenshot>
+  </screenshots>
+  
+  <icon type="stock">io.github.tapscodes.museamp</icon>
+  
+  <categories>
+    <category>Audio</category>
+    <category>Utility</category>
+    <category>FileTools</category>
+  </categories>
+  
+  <provides>
+    <binary>museamp.pyw</binary>
+  </provides>
+  <keywords>
+    <keyword>audio</keyword>
+    <keyword>normalizer</keyword>
+    <keyword>replaygain</keyword>
+    <keyword>music</keyword>
+    <keyword>amplifier</keyword>
+    <keyword>volume</keyword>
+  </keywords>
+</component>
