@@ -642,18 +642,16 @@ class AudioToolGUI(QWidget):
         if not files:
             return
 
-        #check if any files are mp3 and warn the user
-        has_mp3 = any(Path(f).suffix.lower() == ".mp3" for f in files)
-        if has_mp3:
-            reply = QMessageBox.question(
-                self,
-                "Warning: MP3 Gain Application",
-                "Applying gain to MP3 files can irreversibly damage them, unlike FLAC files. Do you want to continue?",
-                QMessageBox.Yes | QMessageBox.No,
-                QMessageBox.No
-            )
-            if reply != QMessageBox.Yes:
-                return
+        #always warn the user before applying gain
+        reply = QMessageBox.question(
+            self,
+            "Warning: Apply Gain",
+            "Applying gain to your files can irreparably damage them regardless of format. Do you want to continue?",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No
+        )
+        if reply != QMessageBox.Yes:
+            return
 
         #get LUFS value from user input
         try:
