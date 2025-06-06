@@ -1,0 +1,99 @@
+{
+  "app-id": "io.github.tapscodes.museamp",
+  "runtime": "org.kde.Platform",
+  "runtime-version": "6.6",
+  "sdk": "org.kde.Sdk",
+  "command": "museamp.pyw",
+  "finish-args": [
+    "--share=network",
+    "--filesystem=host",
+    "--socket=pulseaudio",
+    "--device=all"
+  ],
+  "modules": [
+    {
+      "name": "python3",
+      "buildsystem": "simple",
+      "build-commands": [],
+      "sources": []
+    },
+    {
+      "name": "ffmpeg",
+      "buildsystem": "meson",
+      "config-opts": [
+        "--enable-gpl",
+        "--enable-version3",
+        "--disable-static",
+        "--disable-debug",
+        "--disable-doc"
+      ],
+      "sources": [
+        {
+          "type": "archive",
+          "url": "https://ffmpeg.org/releases/ffmpeg-6.1.1.tar.xz",
+          "sha256": "e1e7b1e3e6e3c7b3e6e3c7b3e6e3c7b3e6e3c7b3e6e3c7b3e6e3c7b3e6e3c7b3"
+        }
+      ]
+    },
+    {
+      "name": "python3-modules",
+      "buildsystem": "simple",
+      "build-commands": [
+        "pip3 install --prefix=/app mutagen PySide6"
+      ],
+      "sources": []
+    },
+    {
+      "name": "museamp",
+      "buildsystem": "simple",
+      "build-commands": [
+        "install -Dm755 museamp.pyw /app/bin/museamp.pyw"
+      ],
+      "sources": [
+        {
+          "type": "file",
+          "path": "museamp.pyw"
+        }
+      ]
+    },
+    {
+      "name": "icon",
+      "buildsystem": "simple",
+      "build-commands": [
+        "install -Dm644 io.github.tapscodes.museamp.svg /app/share/icons/hicolor/scalable/apps/io.github.tapscodes.museamp.svg"
+      ],
+      "sources": [
+        {
+          "type": "file",
+          "path": "io.github.tapscodes.museamp.svg"
+        }
+      ]
+    },
+    {
+      "name": "desktop-file",
+      "buildsystem": "simple",
+      "build-commands": [
+        "install -Dm644 io.github.tapscodes.museamp.desktop /app/share/applications/io.github.tapscodes.museamp.desktop"
+      ],
+      "sources": [
+        {
+          "type": "file",
+          "path": "io.github.tapscodes.museamp.desktop"
+        }
+      ]
+    },
+    {
+      "name": "metainfo",
+      "buildsystem": "simple",
+      "build-commands": [
+        "install -Dm644 io.github.tapscodes.museamp.metainfo.xml /app/share/metainfo/io.github.tapscodes.museamp.metainfo.xml"
+      ],
+      "sources": [
+        {
+          "type": "file",
+          "path": "io.github.tapscodes.museamp.metainfo.xml"
+        }
+      ]
+    }
+  ]
+}
