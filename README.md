@@ -18,8 +18,8 @@ Some other commonly used values are -14 LUFS by Spotify, Amazon Music, and YouTu
 -Fix App Icon/Logo on Linux distros like Fedora
 
 ## Dependancies
--FFmpeg [Download] (https://ffmpeg.org/) to apply gain to files
--RSGain [Download](https://github.com/complexlogic/rsgain) for audio analysis
--Python [Download](https://www.python.org/downloads/) for the libraries below
--Mutagen ```pip install mutagen``` to edit tags
--PySide6 ```pip install PySide6``` for the UI
+- FFmpeg [Download] (https://ffmpeg.org/) to apply gain to files
+- RSGain [Download](https://github.com/complexlogic/rsgain) for audio analysis
+- Python [Download](https://www.python.org/downloads/) for the libraries below
+- Mutagen ```pip install mutagen``` to edit tags
+- PySide6 ```pip install PySide6``` for the UI
