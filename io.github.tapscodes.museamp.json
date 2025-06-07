@@ -3,8 +3,8 @@
   "runtime": "org.kde.Platform",
   "runtime-version": "6.8",
   "sdk": "org.kde.Sdk",
-  "base": "io.qt.qt6.BaseApp",
-  "base-version": "6.9",
+  "base": "io.qt.PySide.BaseApp",
+  "base-version": "6.8",
   "command": "museamp.pyw",
   "finish-args": [
     "--share=network",
