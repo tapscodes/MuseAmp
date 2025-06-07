@@ -3,12 +3,16 @@
   <id>io.github.tapscodes.museamp</id>
   
   <name>MuseAmp</name>
-  <summary>Museamp (Music + Amplifier) is an audio level normalizer/amplifier that makes your audio files play at the same normalized level. It can either directly alter your audio files to amplify their native volume or simply apply a ReplayGain 2.0 standard tag to your files so your audio player of choice knows what audio level to play the audio at.</summary>
+  <summary>An audio level normalizer/amplifier for MP3 and FLAC files</summary>
   
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>BSD-3-Clause</project_license>
   
-  <developer_name>tapscodes</developer_name>
+  <developer>
+    <name>tapscodes</name>
+    <url>https://github.com/tapscodes</url>
+  </developer>
+  <content_rating type="oars-1.0"/>
   <url type="homepage">https://github.com/tapscodes/Museamp</url>
   <url type="bugtracker">https://github.com/tapscodes/Museamp/issues</url>
   <url type="donation">https://github.com/tapscodes/Museamp</url>
@@ -36,7 +40,7 @@
   
   <description>
     <p>
-      Museamp (Music + Amplifier) is an audio level normalizer/amplifier that makes your audio files play at the same normalized level. <br>
+      Museamp (Music + Amplifier) is an audio level normalizer/amplifier that makes your audio files play at the same normalized level.
       It can either directly alter your audio files to amplify their native volume or simply apply a ReplayGain 2.0 standard tag to your files so your audio player of choice knows what audio level to play the audio at.
     </p>
     <ul>
