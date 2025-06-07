@@ -26,3 +26,6 @@ Some other commonly used values are -14 LUFS by Spotify, Amazon Music, and YouTu
 1. Install flatpak and flatpak builder in your repository of choice.
 2. Setup flatpak user with ```flatpak remote-add --if-not-exists --user flathub https://dl.flathub.org/repo/flathub.flatpakrepo``` 
 3. Build with ```flatpak run org.flatpak.Builder builder-dir --user --ccache --force-clean --install io.github.tapscodes.museamp.json``` and run it with ```flatpak run io.github.tapscodes.museamp```
+
+## How to check linter for flathub
+Run ```flatpak run --command=flatpak-builder-lint org.flatpak.Builder manifest io.github.tapscodes.museamp.json``` to check manifest
