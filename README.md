@@ -10,7 +10,10 @@ Museamp (Music + Amplifier) is an audio level normalizer/amplifier that makes yo
 
 ### What are common values for LUFS?
 LUFS value can vary between -5 and -30 with the ReplayGain 2.0 standard being at -18 LUFS, which is also the default for this app.  
-Some other commonly used values are -14 LUFS by Spotify, Amazon Music, and YouTube, -16 LUFS by Apple Music, -18 as a common Podcast value, and -23/-24 LUFS for TV broadcasts. However lots of more modern music tracks are mastered as high as -8 to -10 LUFS to account for listeners who might listen to music at extremely loud volumes.
+
+Some other commonly used values are -14 LUFS by Spotify, Amazon Music, and YouTube, -16 LUFS by Apple Music, -18 as a common Podcast value, and -20 LUFS for TV broadcasts. 
+
+However lots of more modern music tracks are mastered as high as -8 to -10 LUFS to account for listeners who might listen to music at extremely loud volumes. I personally generally use around -16 LUFS.
 
 ## Project Status
 -Supports .mp3 and .flac files which are proper mp3s and flacs, still bad at handling improper flac files (poorly converted ones), will look into that further later
