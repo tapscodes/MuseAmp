@@ -16,10 +16,13 @@
     {
       "name": "python3-modules",
       "buildsystem": "simple",
-      "build-commands": [
-        "pip3 install --prefix=/app mutagen"
-      ],
-      "sources": []
+      "build-commands": [],
+      "sources": [
+        {
+          "type": "file",
+          "path": "python3-mutagen.json"
+        }
+      ]
     },
     {
       "name": "museamp",
