@@ -11,6 +11,7 @@
   "command": "museamp.pyw",
   "finish-args": [
     "--share=network",
+    "--share=ipc",
     "--filesystem=host",
     "--socket=pulseaudio",
     "--device=all",
