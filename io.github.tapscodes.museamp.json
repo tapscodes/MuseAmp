@@ -10,8 +10,10 @@
     "--share=network",
     "--filesystem=host",
     "--socket=pulseaudio",
-    "--device=all"
-  ],
+    "--device=all",
+    "--socket=x11",
+    "--socket=wayland"
+],
   "modules": [
     {
       "name": "python3-modules",
