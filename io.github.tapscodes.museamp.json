@@ -5,6 +5,9 @@
   "sdk": "org.kde.Sdk",
   "base": "io.qt.PySide.BaseApp",
   "base-version": "6.8",
+  "extensions": [
+    "org.kde.Platform.ffmpeg-full"
+  ],
   "command": "museamp.pyw",
   "finish-args": [
     "--share=network",
@@ -13,8 +16,21 @@
     "--device=all",
     "--socket=x11",
     "--socket=wayland"
-],
+  ],
   "modules": [
+    {
+      "name": "rsgain",
+      "buildsystem": "simple",
+      "build-commands": [
+        "install -Dm755 rsgain /app/bin/rsgain"
+      ],
+      "sources": [
+        {
+          "type": "file",
+          "path": "rsgain/rsgain"
+        }
+      ]
+    },
     {
       "name": "python3-modules",
       "buildsystem": "simple",
