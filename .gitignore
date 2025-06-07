@@ -1,9 +1,16 @@
 # Flatpak build artifacts
 build-dir/
+builder-dir/
 .flatpak-builder/
 *.flatpak
 *.flatpakref
 *.flatpakrepo
+
+# Repository directory
+repo-dir/
+
+# Python virtual environment
+.venv/
 
 # Python cache
 __pycache__/
