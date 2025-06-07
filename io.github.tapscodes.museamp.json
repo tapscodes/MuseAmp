@@ -5,10 +5,13 @@
   "sdk": "org.kde.Sdk",
   "base": "io.qt.PySide.BaseApp",
   "base-version": "6.8",
-  "extensions": [
-    "org.kde.Platform.ffmpeg-full"
-  ],
   "command": "museamp.pyw",
+  "add-extensions": {
+    "org.kde.Platform.ffmpeg-full": {
+      "directory": "lib/extensions/ffmpeg-full",
+      "version": "6.8"
+    }
+  },
   "finish-args": [
     "--share=network",
     "--share=ipc",
