@@ -30,8 +30,9 @@
       ],
       "sources": [
         {
-          "type": "file",
-          "path": "rsgain/rsgain"
+          "type": "archive",
+          "url": "https://github.com/complexlogic/rsgain/releases/download/v3.6/rsgain-3.6-Linux.tar.xz",
+          "sha256": "8cb89f10269adb5b455e36468454c3f387419055209e74d8d930aefde4155059"
         }
       ]
     },

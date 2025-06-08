@@ -1,2 +1,0 @@
-# RSGain
-This folder contains the static binary of version 3.6 of rsgain taken from "https://github.com/complexlogic/rsgain". The associated liscences in this folder are RSgain's and the other liscence in root applies to the rest of the code.
