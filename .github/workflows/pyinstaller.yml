@@ -32,9 +32,9 @@ jobs:
           tar xf rsgain-3.6-Linux.tar.xz
           # Find the rsgain binary and copy it to the current directory
           find . -type f -name rsgain -exec cp {} ./rsgain \;
-          wget https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-amd64-static.tar.xz
-          tar xf ffmpeg-release-amd64-static.tar.xz
-          cp ffmpeg-*-amd64-static/ffmpeg ./ffmpeg
+          wget https://github.com/BtbN/FFmpeg-Builds/releases/latest/download/ffmpeg-n7.1-latest-linux64-gpl-7.1.tar.xz
+          tar xf ffmpeg-n7.1-latest-linux64-gpl-7.1.tar.xz
+          cp ffmpeg-n7.1-latest-linux64-gpl-7.1/bin/ffmpeg ./ffmpeg
 
       - name: Download RSgain and FFmpeg (Windows)
         if: runner.os == 'Windows'
@@ -42,8 +42,8 @@ jobs:
           curl -LO https://github.com/complexlogic/rsgain/releases/download/v3.6/rsgain-3.6-win64.zip
           unzip rsgain-3.6-win64.zip
           move rsgain-3.6-win64\rsgain.exe rsgain.exe
-          curl -LO https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip
-          unzip ffmpeg-release-essentials.zip
+          curl -LO https://github.com/BtbN/FFmpeg-Builds/releases/latest/download/ffmpeg-n7.1-latest-win64-gpl-7.1.zip
+          unzip ffmpeg-n7.1-latest-win64-gpl-7.1.zip
           for /r %i in (*\ffmpeg.exe) do copy "%i" ffmpeg.exe
 
       - name: Download RSgain and FFmpeg (macOS)
