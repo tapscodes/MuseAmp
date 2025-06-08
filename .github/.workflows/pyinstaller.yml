@@ -1,0 +1,65 @@
+name: Build executables with PyInstaller
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller PySide6 mutagen
+
+      - name: Download RSgain and FFmpeg (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          wget https://github.com/complexlogic/rsgain/releases/download/v3.6/rsgain-3.6-Linux.tar.xz
+          tar xf rsgain-3.6-Linux.tar.xz
+          mv rsgain ./rsgain
+          wget https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-amd64-static.tar.xz
+          tar xf ffmpeg-release-amd64-static.tar.xz
+          cp ffmpeg-*-amd64-static/ffmpeg ./ffmpeg
+
+      - name: Download RSgain and FFmpeg (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          curl -LO https://github.com/complexlogic/rsgain/releases/download/v3.6/rsgain-3.6-win64.zip
+          unzip rsgain-3.6-win64.zip
+          move rsgain.exe rsgain.exe
+          curl -LO https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip
+          unzip ffmpeg-release-essentials.zip
+          for /r %i in (*\ffmpeg.exe) do copy "%i" ffmpeg.exe
+
+      - name: Download RSgain and FFmpeg (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          curl -LO https://github.com/complexlogic/rsgain/releases/download/v3.6/rsgain-3.6-macOS-x86_64.zip
+          unzip rsgain-3.6-macOS-x86_64.zip
+          mv rsgain ./rsgain
+          brew install ffmpeg || true
+          which ffmpeg && cp $(which ffmpeg) ./ffmpeg || echo "ffmpeg not found"
+
+      - name: Build with PyInstaller
+        run: |
+          pyinstaller --onefile --add-binary "rsgain:." --add-binary "ffmpeg:." museamp.pyw
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: museamp-${{ runner.os }}
+          path: dist/*
