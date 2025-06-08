@@ -30,7 +30,8 @@ jobs:
         run: |
           wget https://github.com/complexlogic/rsgain/releases/download/v3.6/rsgain-3.6-Linux.tar.xz
           tar xf rsgain-3.6-Linux.tar.xz
-          mv rsgain ./rsgain
+          # Find the rsgain binary and copy it to the current directory
+          find . -type f -name rsgain -exec cp {} ./rsgain \;
           wget https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-amd64-static.tar.xz
           tar xf ffmpeg-release-amd64-static.tar.xz
           cp ffmpeg-*-amd64-static/ffmpeg ./ffmpeg
