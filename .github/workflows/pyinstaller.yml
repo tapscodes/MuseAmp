@@ -161,6 +161,10 @@ jobs:
         if: runner.os == 'macOS'
         run: |
           APP_PATH=$(find dist -name "*.app" | head -n 1)
+          if [ -z "$APP_PATH" ]; then
+            echo "Error: No .app file found in the dist directory."
+            exit 1
+          fi
           create-dmg "$APP_PATH"
 
       # --- Upload all artifacts on push ---
