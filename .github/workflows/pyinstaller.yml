@@ -44,7 +44,7 @@ jobs:
           move rsgain-3.6-win64\rsgain.exe rsgain.exe
           curl -LO https://github.com/BtbN/FFmpeg-Builds/releases/latest/download/ffmpeg-n7.1-latest-win64-gpl-7.1.zip
           unzip ffmpeg-n7.1-latest-win64-gpl-7.1.zip
-          for /r %%i in (*\ffmpeg.exe) do copy "%%i" ffmpeg.exe
+          for /r %%i in (*.exe) do if "%%~nxi"=="ffmpeg.exe" copy "%%i" ffmpeg.exe
 
       - name: Download RSgain and FFmpeg (macOS)
         if: runner.os == 'macOS'
