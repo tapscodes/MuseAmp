@@ -69,14 +69,20 @@ jobs:
       - name: Download RSgain and FFmpeg (macOS)
         if: runner.os == 'macOS'
         run: |
-          curl --fail -LO https://github.com/complexlogic/rsgain/releases/download/v3.6/rsgain-3.6-macOS-x86_64.zip
-          unzip rsgain-3.6-macOS-x86_64.zip
-          mv rsgain-3.6-macOS-x86_64/rsgain ./rsgain
+          ARCH=$(uname -m)
+          if [ "$ARCH" = "arm64" ]; then
+            curl --fail -LO https://github.com/complexlogic/rsgain/releases/download/v3.6/rsgain-3.6-macOS-arm64.zip
+            unzip rsgain-3.6-macOS-arm64.zip
+            mv rsgain-3.6-macOS-arm64/rsgain ./rsgain
+          else
+            curl --fail -LO https://github.com/complexlogic/rsgain/releases/download/v3.6/rsgain-3.6-macOS-x86_64.zip
+            unzip rsgain-3.6-macOS-x86_64.zip
+            mv rsgain-3.6-macOS-x86_64/rsgain ./rsgain
+          fi
 
-          # Download latest FFmpeg static binary for macOS from evermeet.cx
+          # Download FFmpeg static binary for macOS from evermeet.cx
           curl --fail -Lo ffmpeg.zip https://evermeet.cx/ffmpeg/ffmpeg.zip
           unzip ffmpeg.zip
-          # ffmpeg binary will be extracted as ./ffmpeg
 
       - name: Build with PyInstaller
         run: |
