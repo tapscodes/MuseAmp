@@ -42,18 +42,13 @@ jobs:
         shell: cmd
         run: |
           curl -LO https://github.com/complexlogic/rsgain/releases/download/v3.6/rsgain-3.6-win64.zip
-          powershell -Command "Expand-Archive -Path rsgain-3.6-win64.zip -DestinationPath ."
-          if exist rsgain.exe (
-            echo "rsgain.exe found in workspace."
+          powershell -Command "Expand-Archive -Path rsgain-3.6-win64.zip -DestinationPath rsgain-win64"
+          if exist rsgain-win64\rsgain.exe (
+            echo "rsgain.exe found in extracted files."
+            move rsgain-win64\rsgain.exe rsgain.exe
           ) else (
-            echo "rsgain.exe not found in workspace, searching in extracted files..."
-            for %%f in (*.exe) do (
-              if /I "%%~nxf"=="rsgain.exe" move "%%f" rsgain.exe
-            )
-          )
-          if not exist rsgain.exe (
             echo "Error: rsgain.exe not found after extraction!"
-            dir
+            dir rsgain-win64
             exit 1
           )
           curl -LO https://github.com/BtbN/FFmpeg-Builds/releases/latest/download/ffmpeg-n7.1-latest-win64-gpl-7.1.zip
