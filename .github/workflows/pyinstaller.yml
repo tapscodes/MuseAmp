@@ -13,7 +13,8 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -38,13 +39,16 @@ jobs:
 
       - name: Download RSgain and FFmpeg (Windows)
         if: runner.os == 'Windows'
+        shell: cmd
         run: |
           curl -LO https://github.com/complexlogic/rsgain/releases/download/v3.6/rsgain-3.6-win64.zip
           unzip rsgain-3.6-win64.zip
           move rsgain-3.6-win64\rsgain.exe rsgain.exe
           curl -LO https://github.com/BtbN/FFmpeg-Builds/releases/latest/download/ffmpeg-n7.1-latest-win64-gpl-7.1.zip
           unzip ffmpeg-n7.1-latest-win64-gpl-7.1.zip
-          for /r %%i in (*.exe) do if "%%~nxi"=="ffmpeg.exe" copy "%%i" ffmpeg.exe
+          for /R %%i in (*.exe) do (
+            if /I "%%~nxi"=="ffmpeg.exe" copy "%%i" ffmpeg.exe
+          )
 
       - name: Download RSgain and FFmpeg (macOS)
         if: runner.os == 'macOS'
