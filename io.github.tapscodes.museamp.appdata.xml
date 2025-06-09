@@ -12,7 +12,9 @@
     <name>tapscodes</name>
     <url>https://github.com/tapscodes</url>
   </developer>
+
   <content_rating type="oars-1.0"/>
+  
   <url type="homepage">https://github.com/tapscodes/Museamp</url>
   <url type="bugtracker">https://github.com/tapscodes/Museamp/issues</url>
   <url type="donation">https://github.com/tapscodes/Museamp</url>
@@ -32,6 +34,7 @@
   <recommends>
     <display_length compare="ge">400</display_length>
   </recommends>
+  
   <supports>
     <control>pointing</control>
     <control>keyboard</control>
@@ -40,18 +43,19 @@
   
   <description>
     <p>
-      Museamp (Music + Amplifier) is an audio level normalizer/amplifier that makes your audio files play at the same normalized level.
+      MuseAmp (Music + Amplifier) is an audio level normalizer/amplifier that makes your audio files play at the same normalized level.
       It can either directly alter your audio files to amplify their native volume or simply apply a ReplayGain 2.0 standard tag to your files so your audio player of choice knows what audio level to play the audio at.
     </p>
     <ul>
       <li>Supports .mp3 and .flac files</li>
       <li>ReplayGain 2.0 tagging and direct gain adjustment</li>
       <li>Batch processing and folder support</li>
-      <li>Modern PySide6(Qt) interface</li>
+      <li>Modern PySide6 (Qt) interface</li>
     </ul>
   </description>
   
   <launchable type="desktop-id">io.github.tapscodes.museamp.desktop</launchable>
+  
   <screenshots>
     <screenshot type="default">
       <image>https://github.com/tapscodes/Museamp/blob/main/screenshot1.jpg?raw=true</image>
@@ -64,7 +68,7 @@
     </screenshot>
   </screenshots>
   
-  <icon type="stock">io.github.tapscodes.museamp</icon>
+  <icon type="cached">io.github.tapscodes.museamp</icon>
   
   <categories>
     <category>Audio</category>
@@ -75,6 +79,7 @@
   <provides>
     <binary>museamp.pyw</binary>
   </provides>
+  
   <keywords>
     <keyword>audio</keyword>
     <keyword>normalizer</keyword>

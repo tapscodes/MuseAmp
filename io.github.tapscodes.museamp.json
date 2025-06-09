@@ -87,15 +87,15 @@
       ]
     },
     {
-      "name": "metainfo",
+      "name": "appdata",
       "buildsystem": "simple",
       "build-commands": [
-        "install -Dm644 io.github.tapscodes.museamp.metainfo.xml /app/share/metainfo/io.github.tapscodes.museamp.metainfo.xml"
+        "install -Dm644 io.github.tapscodes.museamp.appdata.xml /app/share/metainfo/io.github.tapscodes.museamp.appdata.xml"
       ],
       "sources": [
         {
           "type": "file",
-          "path": "io.github.tapscodes.museamp.metainfo.xml"
+          "path": "io.github.tapscodes.museamp.appdata.xml"
         }
       ]
     }
