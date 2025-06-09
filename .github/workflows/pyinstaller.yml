@@ -88,7 +88,7 @@ jobs:
       # --- Build with PyInstaller ---
       - name: Build with PyInstaller
         run: |
-          pyinstaller --onefile --add-binary "rsgain:." --add-binary "ffmpeg:." museamp.pyw
+          pyinstaller --onefile --add-binary "rsgain:." --add-binary "ffmpeg:." MuseAmp.pyw
 
       # --- Linux: Build .deb, .rpm ---
       - name: Install FPM
@@ -99,7 +99,7 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           mkdir -p pkg/usr/local/bin
-          cp dist/museamp pkg/usr/local/bin/
+          cp dist/MuseAmp pkg/usr/local/bin/
           fpm -s dir -t deb -n museamp -v 1.0.0 -C pkg .
 
       - name: Build .rpm package
@@ -121,7 +121,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            dist/museamp
+            dist/MuseAmp
             *.deb
             *.rpm
         env:

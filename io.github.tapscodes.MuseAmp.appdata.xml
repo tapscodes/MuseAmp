@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop-application">
-  <id>io.github.tapscodes.museamp</id>
+  <id>io.github.tapscodes.MuseAmp</id>
   
   <name>MuseAmp</name>
   <summary>An audio level normalizer/amplifier for MP3 and FLAC files</summary>
@@ -15,13 +15,13 @@
 
   <content_rating type="oars-1.0"/>
   
-  <url type="homepage">https://github.com/tapscodes/Museamp</url>
-  <url type="bugtracker">https://github.com/tapscodes/Museamp/issues</url>
-  <url type="donation">https://github.com/tapscodes/Museamp</url>
-  <url type="help">https://github.com/tapscodes/Museamp#how-to-use</url>
-  <url type="translate">https://github.com/tapscodes/Museamp</url>
-  <url type="vcs-browser">https://github.com/tapscodes/Museamp</url>
-  <url type="contribute">https://github.com/tapscodes/Museamp</url>
+  <url type="homepage">https://github.com/tapscodes/MuseAmp</url>
+  <url type="bugtracker">https://github.com/tapscodes/MuseAmp/issues</url>
+  <url type="donation">https://github.com/tapscodes/MuseAmp</url>
+  <url type="help">https://github.com/tapscodes/MuseAmp#how-to-use</url>
+  <url type="translate">https://github.com/tapscodes/MuseAmp</url>
+  <url type="vcs-browser">https://github.com/tapscodes/MuseAmp</url>
+  <url type="contribute">https://github.com/tapscodes/MuseAmp</url>
 
   <releases>
     <release version="1.0.0" date="2025-06-05">
@@ -54,21 +54,21 @@
     </ul>
   </description>
   
-  <launchable type="desktop-id">io.github.tapscodes.museamp.desktop</launchable>
+  <launchable type="desktop-id">io.github.tapscodes.MuseAmp.desktop</launchable>
   
   <screenshots>
     <screenshot type="default">
-      <image>https://github.com/tapscodes/Museamp/blob/main/screenshot1.jpg?raw=true</image>
+      <image>https://github.com/tapscodes/MuseAmp/blob/main/screenshot1.jpg?raw=true</image>
     </screenshot>
     <screenshot>
-      <image>https://github.com/tapscodes/Museamp/blob/main/screenshot2.jpg?raw=true</image>
+      <image>https://github.com/tapscodes/MuseAmp/blob/main/screenshot2.jpg?raw=true</image>
     </screenshot>
     <screenshot>
-      <image>https://github.com/tapscodes/Museamp/blob/main/screenshot3.jpg?raw=true</image>
+      <image>https://github.com/tapscodes/MuseAmp/blob/main/screenshot3.jpg?raw=true</image>
     </screenshot>
   </screenshots>
   
-  <icon type="cached">io.github.tapscodes.museamp</icon>
+  <icon type="cached">io.github.tapscodes.MuseAmp</icon>
   
   <categories>
     <category>Audio</category>
@@ -77,7 +77,7 @@
   </categories>
   
   <provides>
-    <binary>museamp.pyw</binary>
+    <binary>MuseAmp.pyw</binary>
   </provides>
   
   <keywords>

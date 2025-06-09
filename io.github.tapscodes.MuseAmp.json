@@ -1,11 +1,11 @@
 {
-  "app-id": "io.github.tapscodes.museamp",
+  "app-id": "io.github.tapscodes.MuseAmp",
   "runtime": "org.kde.Platform",
   "runtime-version": "6.8",
   "sdk": "org.kde.Sdk",
   "base": "io.qt.PySide.BaseApp",
   "base-version": "6.8",
-  "command": "museamp.pyw",
+  "command": "MuseAmp.pyw",
   "add-extensions": {
     "org.kde.Platform.ffmpeg-full": {
       "directory": "lib/extensions/ffmpeg-full",
@@ -51,12 +51,12 @@
       "name": "museamp",
       "buildsystem": "simple",
       "build-commands": [
-        "install -Dm755 museamp.pyw /app/bin/museamp.pyw"
+        "install -Dm755 MuseAmp.pyw /app/bin/MuseAmp.pyw"
       ],
       "sources": [
         {
           "type": "file",
-          "path": "museamp.pyw"
+          "path": "MuseAmp.pyw"
         }
       ]
     },
@@ -64,12 +64,12 @@
       "name": "icon",
       "buildsystem": "simple",
       "build-commands": [
-        "install -Dm644 io.github.tapscodes.museamp.svg /app/share/icons/hicolor/scalable/apps/io.github.tapscodes.museamp.svg"
+        "install -Dm644 io.github.tapscodes.MuseAmp.svg /app/share/icons/hicolor/scalable/apps/io.github.tapscodes.MuseAmp.svg"
       ],
       "sources": [
         {
           "type": "file",
-          "path": "io.github.tapscodes.museamp.svg"
+          "path": "io.github.tapscodes.MuseAmp.svg"
         }
       ]
     },
@@ -77,12 +77,12 @@
       "name": "desktop-file",
       "buildsystem": "simple",
       "build-commands": [
-        "install -Dm644 io.github.tapscodes.museamp.desktop /app/share/applications/io.github.tapscodes.museamp.desktop"
+        "install -Dm644 io.github.tapscodes.MuseAmp.desktop /app/share/applications/io.github.tapscodes.MuseAmp.desktop"
       ],
       "sources": [
         {
           "type": "file",
-          "path": "io.github.tapscodes.museamp.desktop"
+          "path": "io.github.tapscodes.MuseAmp.desktop"
         }
       ]
     },
@@ -90,12 +90,12 @@
       "name": "appdata",
       "buildsystem": "simple",
       "build-commands": [
-        "install -Dm644 io.github.tapscodes.museamp.appdata.xml /app/share/metainfo/io.github.tapscodes.museamp.appdata.xml"
+        "install -Dm644 io.github.tapscodes.MuseAmp.appdata.xml /app/share/metainfo/io.github.tapscodes.MuseAmp.appdata.xml"
       ],
       "sources": [
         {
           "type": "file",
-          "path": "io.github.tapscodes.museamp.appdata.xml"
+          "path": "io.github.tapscodes.MuseAmp.appdata.xml"
         }
       ]
     }
