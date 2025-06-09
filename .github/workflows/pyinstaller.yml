@@ -62,12 +62,6 @@ jobs:
             )
           )
 
-      - name: Rename rsgain.exe to rsgain (Windows)
-        if: runner.os == 'Windows'
-        shell: cmd
-        run: |
-          if exist rsgain.exe ren rsgain.exe rsgain
-
       # --- macOS: Download RSgain and FFmpeg ---
       - name: Download RSgain and FFmpeg (macOS)
         if: runner.os == 'macOS'
@@ -141,16 +135,16 @@ jobs:
       - name: Create NSIS installer
         if: runner.os == 'Windows'
         run: |
-          echo 'OutFile "dist\\museamp-installer.exe"
-          InstallDir "$PROGRAMFILES\\Museamp"
+          echo 'OutFile "dist\museamp-installer.exe"
+          InstallDir "$PROGRAMFILES\Museamp"
           Page directory
           Page instfiles
           Section
             SetOutPath $INSTDIR
-            File "dist\\museamp.exe"
-            File "dist\\rsgain.exe"
-            File "dist\\ffmpeg.exe"
-            CreateShortCut "$DESKTOP\\Museamp.lnk" "$INSTDIR\\museamp.exe"
+            File "dist\museamp.exe"
+            File "dist\rsgain.exe"
+            File "dist\ffmpeg.exe"
+            CreateShortCut "$DESKTOP\Museamp.lnk" "$INSTDIR\museamp.exe"
           SectionEnd' > museamp-installer.nsi
           makensis museamp-installer.nsi
 
