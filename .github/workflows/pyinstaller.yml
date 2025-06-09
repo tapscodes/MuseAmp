@@ -27,6 +27,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install pyinstaller PySide6 mutagen
 
+      # --- Linux: Download RSgain and FFmpeg ---
       - name: Download RSgain and FFmpeg (Linux)
         if: runner.os == 'Linux'
         run: |
@@ -37,6 +38,7 @@ jobs:
           tar xf ffmpeg-n7.1-latest-linux64-gpl-7.1.tar.xz
           cp ffmpeg-n7.1-latest-linux64-gpl-7.1/bin/ffmpeg ./ffmpeg
 
+      # --- Windows: Download RSgain and FFmpeg ---
       - name: Download RSgain and FFmpeg (Windows)
         if: runner.os == 'Windows'
         shell: cmd
@@ -66,6 +68,7 @@ jobs:
         run: |
           if exist rsgain.exe ren rsgain.exe rsgain
 
+      # --- macOS: Download RSgain and FFmpeg ---
       - name: Download RSgain and FFmpeg (macOS)
         if: runner.os == 'macOS'
         run: |
@@ -79,15 +82,38 @@ jobs:
             unzip rsgain-3.6-macOS-x86_64.zip
             mv rsgain-3.6-macOS-x86_64/rsgain ./rsgain
           fi
-
-          # Download FFmpeg static binary for macOS from evermeet.cx
           curl --fail -Lo ffmpeg.zip https://evermeet.cx/ffmpeg/getrelease/zip
           unzip ffmpeg.zip
 
+      # --- Build with PyInstaller ---
       - name: Build with PyInstaller
         run: |
           pyinstaller --onefile --add-binary "rsgain:." --add-binary "ffmpeg:." museamp.pyw
 
+      # --- Linux: Build .deb, .rpm, AppImage ---
+      - name: Install FPM
+        if: runner.os == 'Linux'
+        run: sudo gem install --no-document fpm
+
+      - name: Build .deb package
+        if: runner.os == 'Linux'
+        run: |
+          mkdir -p pkg/usr/local/bin
+          cp dist/museamp pkg/usr/local/bin/
+          fpm -s dir -t deb -n museamp -v 1.0.0 -C pkg .
+
+      - name: Build .rpm package
+        if: runner.os == 'Linux'
+        run: |
+          fpm -s dir -t rpm -n museamp -v 1.0.0 -C pkg .
+
+      - name: Build AppImage
+        if: runner.os == 'Linux'
+        run: |
+          pip install appimage-builder
+          appimage-builder --recipe appimage-builder.yml
+
+      # --- Upload artifact (Actions tab) ---
       - name: Upload artifact (Actions tab)
         if: github.event_name == 'push'
         uses: actions/upload-artifact@v4
@@ -95,8 +121,22 @@ jobs:
           name: museamp-${{ runner.os }}
           path: dist/*
 
+      # --- Upload Linux packages to GitHub Releases ---
+      - name: Upload Linux packages to Release
+        if: runner.os == 'Linux' && github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/museamp
+            *.deb
+            *.rpm
+            *.AppImage
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # --- Upload to GitHub Releases (Windows/macOS) ---
       - name: Upload to GitHub Releases
-        if: github.event_name == 'release'
+        if: github.event_name == 'release' && runner.os != 'Linux'
         uses: softprops/action-gh-release@v2
         with:
           files: dist/*
