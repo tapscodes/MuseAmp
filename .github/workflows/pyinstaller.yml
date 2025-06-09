@@ -43,18 +43,16 @@ jobs:
         run: |
           curl -LO https://github.com/complexlogic/rsgain/releases/download/v3.6/rsgain-3.6-win64.zip
           powershell -Command "Expand-Archive -Path rsgain-3.6-win64.zip -DestinationPath rsgain-win64"
-          if exist rsgain-win64\rsgain.exe (
-            echo "rsgain.exe found in extracted files."
-            move rsgain-win64\rsgain.exe rsgain.exe
-          ) else (
-            echo "Error: rsgain.exe not found after extraction!"
-            dir rsgain-win64
-            exit 1
+          dir rsgain-win64
+          for /R rsgain-win64 %%i in (rsgain.exe) do (
+            if exist "%%i" (
+              echo "rsgain.exe found: %%i"
+              copy "%%i" rsgain.exe
+            )
           )
-          curl -LO https://github.com/BtbN/FFmpeg-Builds/releases/latest/download/ffmpeg-n7.1-latest-win64-gpl-7.1.zip
-          powershell -Command "Expand-Archive -Path ffmpeg-n7.1-latest-win64-gpl-7.1.zip -DestinationPath ffmpeg-win64"
-          for /R ffmpeg-win64 %%i in (*.exe) do (
-            if /I "%%~nxi"=="ffmpeg.exe" copy "%%i" ffmpeg.exe
+          if not exist rsgain.exe (
+            echo "Error: rsgain.exe not found!"
+            exit 1
           )
 
       - name: Download RSgain and FFmpeg (macOS)
