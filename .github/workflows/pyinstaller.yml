@@ -75,15 +75,15 @@ jobs:
           ARCH=$(uname -m)
           if [ "$ARCH" = "arm64" ]; then
             curl --fail -LO https://github.com/complexlogic/rsgain/releases/download/v3.6/rsgain-3.6-macOS-arm64.zip
-            unzip rsgain-3.6-macOS-arm64.zip
-            mv rsgain-3.6-macOS-arm64/rsgain ./rsgain
+            unzip rsgain-3.6-macOS-arm64.zip || { echo "Failed to unzip rsgain-arm64"; exit 1; }
+            mv rsgain-3.6-macOS-arm64/rsgain ./rsgain || { echo "Failed to move rsgain-arm64"; exit 1; }
           else
             curl --fail -LO https://github.com/complexlogic/rsgain/releases/download/v3.6/rsgain-3.6-macOS-x86_64.zip
-            unzip rsgain-3.6-macOS-x86_64.zip
-            mv rsgain-3.6-macOS-x86_64/rsgain ./rsgain
+            unzip rsgain-3.6-macOS-x86_64.zip || { echo "Failed to unzip rsgain-x86_64"; exit 1; }
+            mv rsgain-3.6-macOS-x86_64/rsgain ./rsgain || { echo "Failed to move rsgain-x86_64"; exit 1; }
           fi
           curl --fail -Lo ffmpeg.zip https://evermeet.cx/ffmpeg/getrelease/zip
-          unzip ffmpeg.zip
+          unzip ffmpeg.zip || { echo "Failed to unzip FFmpeg"; exit 1; }
 
       # --- Build with PyInstaller ---
       - name: Build with PyInstaller (Linux)
@@ -96,10 +96,12 @@ jobs:
         run: |
           pyinstaller --onefile --windowed --add-binary "rsgain.exe;." --add-binary "ffmpeg.exe;." museamp.pyw
 
+      # --- macOS explicit .app bundle generation ---
       - name: Build with PyInstaller (macOS)
         if: runner.os == 'macOS'
         run: |
-          pyinstaller --windowed --onedir --add-binary "rsgain:." --add-binary "ffmpeg:." museamp.pyw
+          pyinstaller --windowed --onedir --name MuseAmp --osx-bundle-identifier com.tapscodes.museamp --add-binary "rsgain:." --add-binary "ffmpeg:." museamp.pyw
+          ls dist
 
       # --- Linux: Build .deb, .rpm, AppImage, Flatpak ---
       - name: Install FPM
