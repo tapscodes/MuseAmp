@@ -99,7 +99,7 @@ jobs:
       - name: Build with PyInstaller (macOS)
         if: runner.os == 'macOS'
         run: |
-          pyinstaller --onefile --windowed --add-binary "rsgain:." --add-binary "ffmpeg:." museamp.pyw
+          pyinstaller --windowed --onedir --add-binary "rsgain:." --add-binary "ffmpeg:." museamp.pyw
 
       # --- Linux: Build .deb, .rpm, AppImage, Flatpak ---
       - name: Install FPM
@@ -165,7 +165,7 @@ jobs:
             echo "Error: No .app file found in the dist directory."
             exit 1
           fi
-          create-dmg "$APP_PATH"
+          create-dmg --volname MuseAmpInstaller --window-size 800x400 --output dist/MuseAmpInstaller.dmg "$APP_PATH"
 
       # --- Upload all artifacts on push ---
       - name: Upload Linux packages
