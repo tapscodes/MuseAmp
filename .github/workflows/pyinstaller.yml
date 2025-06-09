@@ -1,9 +1,10 @@
-name: Build executables with PyInstaller
+name: Build executables with PyInstaller and upload to Releases
 
 on:
   push:
     branches: [ main ]
-  pull_request:
+  release:
+    types: [published]
 
 jobs:
   build:
@@ -31,7 +32,6 @@ jobs:
         run: |
           wget https://github.com/complexlogic/rsgain/releases/download/v3.6/rsgain-3.6-Linux.tar.xz
           tar xf rsgain-3.6-Linux.tar.xz
-          # Find the rsgain binary and copy it to the current directory
           find . -type f -name rsgain -exec cp {} ./rsgain \;
           wget https://github.com/BtbN/FFmpeg-Builds/releases/latest/download/ffmpeg-n7.1-latest-linux64-gpl-7.1.tar.xz
           tar xf ffmpeg-n7.1-latest-linux64-gpl-7.1.tar.xz
@@ -88,8 +88,17 @@ jobs:
         run: |
           pyinstaller --onefile --add-binary "rsgain:." --add-binary "ffmpeg:." museamp.pyw
 
-      - name: Upload artifact
+      - name: Upload artifact (Actions tab)
+        if: github.event_name == 'push'
         uses: actions/upload-artifact@v4
         with:
           name: museamp-${{ runner.os }}
           path: dist/*
+
+      - name: Upload to GitHub Releases
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
