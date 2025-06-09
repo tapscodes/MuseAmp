@@ -81,7 +81,7 @@ jobs:
           fi
 
           # Download FFmpeg static binary for macOS from evermeet.cx
-          curl --fail -Lo ffmpeg.zip https://evermeet.cx/ffmpeg/ffmpeg.zip
+          curl --fail -Lo ffmpeg.zip https://evermeet.cx/ffmpeg/getrelease/zip
           unzip ffmpeg.zip
 
       - name: Build with PyInstaller
