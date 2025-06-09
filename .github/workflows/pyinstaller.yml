@@ -31,10 +31,11 @@ jobs:
         run: |
           wget https://github.com/complexlogic/rsgain/releases/download/v3.6/rsgain-3.6-Linux.tar.xz
           tar xf rsgain-3.6-Linux.tar.xz
+          # Find the rsgain binary and copy it to the current directory
           find . -type f -name rsgain -exec cp {} ./rsgain \;
-          wget https://github.com/BtbN/FFmpeg-Builds/releases/latest/download/ffmpeg-n7.1-latest-linux64-gpl.tar.xz
-          tar xf ffmpeg-n7.1-latest-linux64-gpl.tar.xz
-          cp ffmpeg-n7.1-latest-linux64-gpl/bin/ffmpeg ./ffmpeg
+          wget https://github.com/BtbN/FFmpeg-Builds/releases/latest/download/ffmpeg-n7.1-latest-linux64-gpl-7.1.tar.xz
+          tar xf ffmpeg-n7.1-latest-linux64-gpl-7.1.tar.xz
+          cp ffmpeg-n7.1-latest-linux64-gpl-7.1/bin/ffmpeg ./ffmpeg
 
       - name: Download RSgain and FFmpeg (Windows)
         if: runner.os == 'Windows'
@@ -44,7 +45,6 @@ jobs:
           powershell -Command "Expand-Archive -Path rsgain-3.6-win64.zip -DestinationPath rsgain-win64"
           for /R rsgain-win64 %%i in (rsgain.exe) do (
             if exist "%%i" (
-              echo "rsgain.exe found: %%i"
               copy "%%i" rsgain.exe
             )
           )
@@ -52,19 +52,12 @@ jobs:
             echo "Error: rsgain.exe not found!"
             exit 1
           )
-          curl -LO https://github.com/BtbN/FFmpeg-Builds/releases/latest/download/ffmpeg-n7.1-latest-win64-gpl.zip
-          powershell -Command "Expand-Archive -Path ffmpeg-n7.1-latest-win64-gpl.zip -DestinationPath ffmpeg"
+          curl -LO https://github.com/BtbN/FFmpeg-Builds/releases/latest/download/ffmpeg-n7.1-latest-win64-gpl-7.1.zip
+          powershell -Command "Expand-Archive -Path ffmpeg-n7.1-latest-win64-gpl-7.1.zip -DestinationPath ffmpeg"
           for /R ffmpeg %%i in (ffmpeg.exe) do (
             if exist "%%i" (
-              echo "ffmpeg.exe found: %%i"
               copy "%%i" ffmpeg.exe
-              goto :ffmpegFound
             )
-          )
-          :ffmpegFound
-          if not exist ffmpeg.exe (
-            echo "Error: ffmpeg.exe not found!"
-            exit 1
           )
 
       - name: Rename rsgain.exe to rsgain (Windows)
@@ -79,10 +72,9 @@ jobs:
           curl -LO https://github.com/complexlogic/rsgain/releases/download/v3.6/rsgain-3.6-macOS-x86_64.zip
           unzip rsgain-3.6-macOS-x86_64.zip
           mv rsgain-3.6-macOS-x86_64/rsgain ./rsgain
-          curl -LO https://github.com/BtbN/FFmpeg-Builds/releases/latest/download/ffmpeg-n7.1-latest-macos64-gpl.zip
-          unzip ffmpeg-n7.1-latest-macos64-gpl.zip
-          # The BtbN macOS build unzips to a folder, so copy ffmpeg binary to root
-          cp ffmpeg-n7.1-latest-macos64-gpl/bin/ffmpeg ./ffmpeg
+          curl -LO https://github.com/BtbN/FFmpeg-Builds/releases/latest/download/ffmpeg-n7.1-latest-macos64-gpl-7.1.zip
+          unzip ffmpeg-n7.1-latest-macos64-gpl-7.1.zip
+          cp ffmpeg-n7.1-latest-macos64-gpl-7.1/bin/ffmpeg ./ffmpeg
 
       - name: Build with PyInstaller
         run: |
