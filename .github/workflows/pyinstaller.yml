@@ -27,6 +27,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install pyinstaller PySide6 mutagen
 
+      # --- Linux: Download RSgain and FFmpeg ---
       - name: Download RSgain and FFmpeg (Linux)
         if: runner.os == 'Linux'
         run: |
@@ -37,6 +38,7 @@ jobs:
           tar xf ffmpeg-n7.1-latest-linux64-gpl-7.1.tar.xz
           cp ffmpeg-n7.1-latest-linux64-gpl-7.1/bin/ffmpeg ./ffmpeg
 
+      # --- Windows: Download RSgain and FFmpeg ---
       - name: Download RSgain and FFmpeg (Windows)
         if: runner.os == 'Windows'
         shell: cmd
@@ -66,6 +68,7 @@ jobs:
         run: |
           if exist rsgain.exe ren rsgain.exe rsgain
 
+      # --- macOS: Download RSgain and FFmpeg ---
       - name: Download RSgain and FFmpeg (macOS)
         if: runner.os == 'macOS'
         run: |
@@ -79,26 +82,152 @@ jobs:
             unzip rsgain-3.6-macOS-x86_64.zip
             mv rsgain-3.6-macOS-x86_64/rsgain ./rsgain
           fi
-
-          # Download FFmpeg static binary for macOS from evermeet.cx
           curl --fail -Lo ffmpeg.zip https://evermeet.cx/ffmpeg/getrelease/zip
           unzip ffmpeg.zip
 
-      - name: Build with PyInstaller
+      # --- Build with PyInstaller ---
+      - name: Build with PyInstaller (Linux)
+        if: runner.os == 'Linux'
         run: |
           pyinstaller --onefile --add-binary "rsgain:." --add-binary "ffmpeg:." museamp.pyw
 
-      - name: Upload artifact (Actions tab)
-        if: github.event_name == 'push'
+      - name: Build with PyInstaller (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          pyinstaller --onefile --windowed --add-binary "rsgain.exe;." --add-binary "ffmpeg.exe;." museamp.pyw
+
+      - name: Build with PyInstaller (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          pyinstaller --onefile --windowed --add-binary "rsgain:." --add-binary "ffmpeg:." museamp.pyw
+
+      # --- Linux: Build .deb, .rpm, AppImage, Flatpak ---
+      - name: Install FPM
+        if: runner.os == 'Linux'
+        run: sudo gem install --no-document fpm
+
+      - name: Build .deb package
+        if: runner.os == 'Linux'
+        run: |
+          mkdir -p pkg/usr/local/bin
+          cp dist/museamp pkg/usr/local/bin/
+          fpm -s dir -t deb -n museamp -v 1.0.0 -C pkg .
+
+      - name: Build .rpm package
+        if: runner.os == 'Linux'
+        run: |
+          fpm -s dir -t rpm -n museamp -v 1.0.0 -C pkg .
+
+      - name: Build AppImage
+        if: runner.os == 'Linux'
+        run: |
+          pip install appimage-builder
+          appimage-builder --recipe appimage-builder.yml
+
+      - name: Build Flatpak
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y flatpak flatpak-builder
+          flatpak-builder --repo=repo build-dir io.github.tapscodes.museamp.json
+
+      # --- Windows: Create NSIS installer ---
+      - name: Install NSIS
+        if: runner.os == 'Windows'
+        run: choco install nsis
+
+      - name: Create NSIS installer
+        if: runner.os == 'Windows'
+        run: |
+          echo 'OutFile "dist\\museamp-installer.exe"
+          InstallDir "$PROGRAMFILES\\Museamp"
+          Page directory
+          Page instfiles
+          Section
+            SetOutPath $INSTDIR
+            File "dist\\museamp.exe"
+            File "dist\\rsgain.exe"
+            File "dist\\ffmpeg.exe"
+            CreateShortCut "$DESKTOP\\Museamp.lnk" "$INSTDIR\\museamp.exe"
+          SectionEnd' > museamp-installer.nsi
+          makensis museamp-installer.nsi
+
+      # --- macOS: Create DMG installer ---
+      - name: Install create-dmg
+        if: runner.os == 'macOS'
+        run: brew install create-dmg
+
+      - name: Create DMG
+        if: runner.os == 'macOS'
+        run: |
+          APP_PATH=$(find dist -name "*.app" | head -n 1)
+          create-dmg "$APP_PATH"
+
+      # --- Upload all artifacts on push ---
+      - name: Upload Linux packages
+        if: runner.os == 'Linux' && github.event_name == 'push'
         uses: actions/upload-artifact@v4
         with:
-          name: museamp-${{ runner.os }}
-          path: dist/*
+          name: museamp-linux-packages
+          path: |
+            dist/museamp
+            *.deb
+            *.rpm
+            *.AppImage
+            repo
+            build-dir
 
-      - name: Upload to GitHub Releases
-        if: github.event_name == 'release'
+      - name: Upload Windows artifacts
+        if: runner.os == 'Windows' && github.event_name == 'push'
+        uses: actions/upload-artifact@v4
+        with:
+          name: museamp-windows
+          path: |
+            dist/museamp.exe
+            dist/museamp-installer.exe
+
+      - name: Upload macOS artifacts
+        if: runner.os == 'macOS' && github.event_name == 'push'
+        uses: actions/upload-artifact@v4
+        with:
+          name: museamp-macos
+          path: |
+            dist/museamp
+            dist/*.app
+            *.dmg
+
+      # --- Upload to GitHub Releases on release ---
+      - name: Upload Linux packages to Release
+        if: runner.os == 'Linux' && github.event_name == 'release'
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/*
+          files: |
+            dist/museamp
+            *.deb
+            *.rpm
+            *.AppImage
+            repo
+            build-dir
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Windows artifacts to Release
+        if: runner.os == 'Windows' && github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/museamp.exe
+            dist/museamp-installer.exe
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload macOS artifacts to Release
+        if: runner.os == 'macOS' && github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/museamp
+            dist/*.app
+            *.dmg
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
