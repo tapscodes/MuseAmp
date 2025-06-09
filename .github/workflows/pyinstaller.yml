@@ -55,6 +55,12 @@ jobs:
             exit 1
           )
 
+      - name: Rename rsgain.exe to rsgain (Windows)
+        if: runner.os == 'Windows'
+        shell: cmd
+        run: |
+          if exist rsgain.exe ren rsgain.exe rsgain
+
       - name: Download RSgain and FFmpeg (macOS)
         if: runner.os == 'macOS'
         run: |
