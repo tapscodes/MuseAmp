@@ -56,7 +56,8 @@
       "sources": [
         {
           "type": "file",
-          "path": "MuseAmp.pyw"
+          "url": "https://raw.githubusercontent.com/tapscodes/MuseAmp/main/MuseAmp.pyw",
+          "sha256": "34ba5dc5fb2ff44a205fa3e7b16b982091e6d4c66df592c1a3154743bc30da74"
         }
       ]
     },
@@ -69,7 +70,8 @@
       "sources": [
         {
           "type": "file",
-          "path": "io.github.tapscodes.MuseAmp.svg"
+          "url": "https://raw.githubusercontent.com/tapscodes/MuseAmp/main/io.github.tapscodes.MuseAmp.svg",
+          "sha256": "bc0e8736dd91a4bb62bf7f81de4febd25eac61e7fe0b2a160cdc80833939e4b4"
         }
       ]
     },
@@ -82,7 +84,8 @@
       "sources": [
         {
           "type": "file",
-          "path": "io.github.tapscodes.MuseAmp.desktop"
+          "url": "https://raw.githubusercontent.com/tapscodes/MuseAmp/main/io.github.tapscodes.MuseAmp.desktop",
+          "sha256": "c68f017d058d673b0fc0127301bb9288f544af5824cc40e03039fb33a6018312"
         }
       ]
     },
@@ -95,7 +98,8 @@
       "sources": [
         {
           "type": "file",
-          "path": "io.github.tapscodes.MuseAmp.appdata.xml"
+          "url": "https://raw.githubusercontent.com/tapscodes/MuseAmp/main/io.github.tapscodes.MuseAmp.appdata.xml",
+          "sha256": "b939447d3921fb0eb1631d8a69d5394c16c111476afe6da663ae6bd09b8839dd"
         }
       ]
     }
