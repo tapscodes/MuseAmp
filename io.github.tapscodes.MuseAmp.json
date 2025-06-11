@@ -52,7 +52,7 @@
       "buildsystem": "simple",
       "build-commands": [
         "install -Dm755 MuseAmp.pyw /app/bin/MuseAmp.pyw",
-        "cp -r MuseAmp-1.0.0/museamp /app/bin/"
+        "cp -r museamp /app/bin/"
       ],
       "sources": [
         {
