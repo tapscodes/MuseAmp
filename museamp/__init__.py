@@ -1,0 +1,1 @@
+#MuseAmp package initialization
