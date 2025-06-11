@@ -1,0 +1,112 @@
+{
+  "app-id": "io.github.tapscodes.MuseAmp",
+  "runtime": "org.kde.Platform",
+  "runtime-version": "6.8",
+  "sdk": "org.kde.Sdk",
+  "base": "io.qt.PySide.BaseApp",
+  "base-version": "6.8",
+  "command": "MuseAmp.pyw",
+  "add-extensions": {
+    "org.kde.Platform.ffmpeg-full": {
+      "directory": "lib/extensions/ffmpeg-full",
+      "version": "6.8"
+    }
+  },
+  "finish-args": [
+    "--share=network",
+    "--share=ipc",
+    "--filesystem=host",
+    "--socket=pulseaudio",
+    "--device=all",
+    "--socket=x11",
+    "--socket=wayland"
+  ],
+  "modules": [
+    {
+      "name": "rsgain",
+      "buildsystem": "simple",
+      "build-commands": [
+        "install -Dm755 rsgain /app/bin/rsgain"
+      ],
+      "sources": [
+        {
+          "type": "archive",
+          "url": "https://github.com/complexlogic/rsgain/releases/download/v3.6/rsgain-3.6-Linux.tar.xz",
+          "sha256": "8cb89f10269adb5b455e36468454c3f387419055209e74d8d930aefde4155059"
+        }
+      ]
+    },
+    {
+      "name": "python3-modules",
+      "buildsystem": "simple",
+      "build-commands": [],
+      "sources": [
+        {
+          "type": "file",
+          "path": "python3-mutagen.json"
+        }
+      ]
+    },
+    {
+      "name": "museamp",
+      "buildsystem": "simple",
+      "build-commands": [
+        "install -Dm755 MuseAmp.pyw /app/bin/MuseAmp.pyw",
+        "cp -r museamp /app/bin/"
+      ],
+      "sources": [
+        {
+          "type": "file",
+          "path": "MuseAmp.pyw"
+        },
+        {
+          "type": "dir",
+          "path": "museamp",
+          "dest": "museamp"
+        }
+      ]
+    },
+    {
+      "name": "icon",
+      "buildsystem": "simple",
+      "build-commands": [
+        "install -Dm644 io.github.tapscodes.MuseAmp.svg /app/share/icons/hicolor/scalable/apps/io.github.tapscodes.MuseAmp.svg"
+      ],
+      "sources": [
+        {
+          "type": "file",
+          "url": "https://raw.githubusercontent.com/tapscodes/MuseAmp/main/io.github.tapscodes.MuseAmp.svg",
+          "sha256": "bc0e8736dd91a4bb62bf7f81de4febd25eac61e7fe0b2a160cdc80833939e4b4"
+        }
+      ]
+    },
+    {
+      "name": "desktop-file",
+      "buildsystem": "simple",
+      "build-commands": [
+        "install -Dm644 io.github.tapscodes.MuseAmp.desktop /app/share/applications/io.github.tapscodes.MuseAmp.desktop"
+      ],
+      "sources": [
+        {
+          "type": "file",
+          "url": "https://raw.githubusercontent.com/tapscodes/MuseAmp/main/io.github.tapscodes.MuseAmp.desktop",
+          "sha256": "c68f017d058d673b0fc0127301bb9288f544af5824cc40e03039fb33a6018312"
+        }
+      ]
+    },
+    {
+      "name": "appdata",
+      "buildsystem": "simple",
+      "build-commands": [
+        "install -Dm644 io.github.tapscodes.MuseAmp.appdata.xml /app/share/metainfo/io.github.tapscodes.MuseAmp.appdata.xml"
+      ],
+      "sources": [
+        {
+          "type": "file",
+          "url": "https://raw.githubusercontent.com/tapscodes/MuseAmp/main/io.github.tapscodes.MuseAmp.appdata.xml",
+          "sha256": "b939447d3921fb0eb1631d8a69d5394c16c111476afe6da663ae6bd09b8839dd"
+        }
+      ]
+    }
+  ]
+}

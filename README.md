@@ -36,5 +36,7 @@ To contribute all you need to do is fork the program, make your changes, and the
 2. Setup flatpak user with ```flatpak remote-add --if-not-exists --user flathub https://dl.flathub.org/repo/flathub.flatpakrepo``` 
 3. Build with ```flatpak run org.flatpak.Builder builder-dir --user --ccache --force-clean --install io.github.tapscodes.MuseAmp.json``` and run it with ```flatpak run io.github.tapscodes.MuseAmp```
 
+Alternative localtest (no github repo DL) version: ```flatpak run org.flatpak.Builder builder-dir --user --ccache --force-clean --install io.github.tapscodes.MuseAmp.localtest.json``` and ```flatpak run io.github.tapscodes.MuseAmp``` still to run.
+
 ## How to check linter for flathub (for devs)
 Run ```flatpak run --command=flatpak-builder-lint org.flatpak.Builder manifest io.github.tapscodes.MuseAmp.json``` to check manifest
