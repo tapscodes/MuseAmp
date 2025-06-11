@@ -43,7 +43,7 @@
   
   <description>
     <p>
-      MuseAmp (Music + Amplifier) is an audio level normalizer/amplifier that makes your audio files play at the same normalized level.
+      MuseAmp (Music + Amplifier) is an audio level normalizer/amplifier similar to the windows software "MP3Gain" that makes your audio files play at the same normalized level.
       It can either directly alter your audio files to amplify their native volume or simply apply a ReplayGain 2.0 standard tag to your files so your audio player of choice knows what audio level to play the audio at.
     </p>
     <ul>
