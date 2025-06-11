@@ -52,13 +52,13 @@
       "buildsystem": "simple",
       "build-commands": [
         "install -Dm755 MuseAmp.pyw /app/bin/MuseAmp.pyw",
-        "cp -r museamp /app/bin/"
+        "cp -r MuseAmp-1.0.0/museamp /app/bin/"
       ],
       "sources": [
         {
           "type": "archive",
           "url": "https://github.com/tapscodes/MuseAmp/archive/refs/tags/v1.0.0.zip",
-          "sha256": "<REPLACE_WITH_SHA256_FOR_TAG>"
+          "sha256": "e6edf77ab51d9607c8f07626cb1b51af508283e2700000773fad8e9276319dbe"
         }
       ]
     },
