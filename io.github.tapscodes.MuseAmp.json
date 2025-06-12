@@ -18,8 +18,8 @@
     "--filesystem=host",
     "--socket=pulseaudio",
     "--device=all",
-    "--socket=x11",
-    "--socket=wayland"
+    "--socket=wayland",
+    "--socket=fallback-x11"
   ],
   "modules": [
     {
