@@ -1,19 +1,17 @@
 {
   "app-id": "io.github.tapscodes.MuseAmp",
   "runtime": "org.kde.Platform",
-  "runtime-version": "6.8",
+  "runtime-version": "6.9",
   "sdk": "org.kde.Sdk",
   "base": "io.qt.PySide.BaseApp",
   "base-version": "6.8",
   "command": "MuseAmp.pyw",
   "add-extensions": {
-    "org.kde.Platform.ffmpeg-full": {
-      "directory": "lib/extensions/ffmpeg-full",
-      "version": "6.8"
+    "org.freedesktop.Platform.ffmpeg-full": {
+      "version": "24.08"
     }
   },
   "finish-args": [
-    "--share=network",
     "--share=ipc",
     "--socket=pulseaudio",
     "--socket=wayland",
