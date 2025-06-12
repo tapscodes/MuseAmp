@@ -1,6 +1,7 @@
 import subprocess
 from pathlib import Path
 from PySide6.QtCore import QObject, Signal
+import os 
 
 #supported file types for processing
 supported_filetypes = {".flac", ".mp3"}

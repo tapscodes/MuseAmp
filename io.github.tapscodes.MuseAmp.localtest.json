@@ -52,7 +52,10 @@
       "buildsystem": "simple",
       "build-commands": [
         "install -Dm755 MuseAmp.pyw /app/bin/MuseAmp.pyw",
-        "cp -r museamp /app/bin/"
+        "cp -r museamp /app/bin/",
+        "install -Dm644 io.github.tapscodes.MuseAmp.svg /app/share/icons/hicolor/scalable/apps/io.github.tapscodes.MuseAmp.svg",
+        "install -Dm644 io.github.tapscodes.MuseAmp.desktop /app/share/applications/io.github.tapscodes.MuseAmp.desktop",
+        "install -Dm644 io.github.tapscodes.MuseAmp.appdata.xml /app/share/metainfo/io.github.tapscodes.MuseAmp.appdata.xml"
       ],
       "sources": [
         {
@@ -63,48 +66,18 @@
           "type": "dir",
           "path": "museamp",
           "dest": "museamp"
-        }
-      ]
-    },
-    {
-      "name": "icon",
-      "buildsystem": "simple",
-      "build-commands": [
-        "install -Dm644 io.github.tapscodes.MuseAmp.svg /app/share/icons/hicolor/scalable/apps/io.github.tapscodes.MuseAmp.svg"
-      ],
-      "sources": [
+        },
         {
           "type": "file",
-          "url": "https://raw.githubusercontent.com/tapscodes/MuseAmp/main/io.github.tapscodes.MuseAmp.svg",
-          "sha256": "bc0e8736dd91a4bb62bf7f81de4febd25eac61e7fe0b2a160cdc80833939e4b4"
-        }
-      ]
-    },
-    {
-      "name": "desktop-file",
-      "buildsystem": "simple",
-      "build-commands": [
-        "install -Dm644 io.github.tapscodes.MuseAmp.desktop /app/share/applications/io.github.tapscodes.MuseAmp.desktop"
-      ],
-      "sources": [
+          "path": "io.github.tapscodes.MuseAmp.svg"
+        },
         {
           "type": "file",
-          "url": "https://raw.githubusercontent.com/tapscodes/MuseAmp/main/io.github.tapscodes.MuseAmp.desktop",
-          "sha256": "c68f017d058d673b0fc0127301bb9288f544af5824cc40e03039fb33a6018312"
-        }
-      ]
-    },
-    {
-      "name": "appdata",
-      "buildsystem": "simple",
-      "build-commands": [
-        "install -Dm644 io.github.tapscodes.MuseAmp.appdata.xml /app/share/metainfo/io.github.tapscodes.MuseAmp.appdata.xml"
-      ],
-      "sources": [
+          "path": "io.github.tapscodes.MuseAmp.desktop"
+        },
         {
           "type": "file",
-          "url": "https://raw.githubusercontent.com/tapscodes/MuseAmp/main/io.github.tapscodes.MuseAmp.appdata.xml",
-          "sha256": "b939447d3921fb0eb1631d8a69d5394c16c111476afe6da663ae6bd09b8839dd"
+          "path": "io.github.tapscodes.MuseAmp.appdata.xml"
         }
       ]
     }
