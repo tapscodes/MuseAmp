@@ -8,7 +8,9 @@
   "command": "MuseAmp.pyw",
   "add-extensions": {
     "org.freedesktop.Platform.ffmpeg-full": {
-      "version": "24.08"
+      "version": "24.08",
+      "directory": "lib/ffmpeg",
+      "add-ld-path": "."
     }
   },
   "finish-args": [
