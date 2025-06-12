@@ -36,17 +36,7 @@
         }
       ]
     },
-    {
-      "name": "python3-modules",
-      "buildsystem": "simple",
-      "build-commands": [],
-      "sources": [
-        {
-          "type": "file",
-          "path": "python3-mutagen.json"
-        }
-      ]
-    },
+    "python3-mutagen.json",
     {
       "name": "museamp",
       "buildsystem": "simple",
