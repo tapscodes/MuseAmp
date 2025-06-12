@@ -13,7 +13,6 @@
   },
   "finish-args": [
     "--share=ipc",
-    "--socket=pulseaudio",
     "--socket=wayland",
     "--socket=fallback-x11"
   ],
