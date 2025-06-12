@@ -8,9 +8,7 @@
   "command": "MuseAmp.pyw",
   "add-extensions": {
     "org.freedesktop.Platform.ffmpeg-full": {
-      "version": "24.08",
-      "directory": "lib/ffmpeg",
-      "add-ld-path": "."
+      "version": "24.08"
     }
   },
   "finish-args": [
@@ -19,18 +17,6 @@
     "--socket=fallback-x11"
   ],
   "modules": [
-    {
-      "name": "rsgain",
-      "buildsystem": "cmake-ninja",
-      "builddir": true,
-      "sources": [
-        {
-          "type": "git",
-          "url": "https://github.com/complexlogic/rsgain.git",
-          "tag": "v3.6"
-        }
-      ]
-    },
     "python3-mutagen.json",
     {
       "name": "museamp",
@@ -63,6 +49,18 @@
         {
           "type": "file",
           "path": "io.github.tapscodes.MuseAmp.appdata.xml"
+        }
+      ]
+    },
+    {
+      "name": "rsgain",
+      "buildsystem": "cmake-ninja",
+      "builddir": true,
+      "sources": [
+        {
+          "type": "git",
+          "url": "https://github.com/complexlogic/rsgain.git",
+          "tag": "v3.6"
         }
       ]
     }
