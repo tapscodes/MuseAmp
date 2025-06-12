@@ -8,9 +8,7 @@
   "command": "MuseAmp.pyw",
   "add-extensions": {
     "org.freedesktop.Platform.ffmpeg-full": {
-      "version": "24.08",
-      "directory": "lib/ffmpeg",
-      "add-ld-path": "."
+      "version": "24.08"
     }
   },
   "finish-args": [
@@ -49,7 +47,7 @@
         {
           "type": "archive",
           "url": "https://github.com/tapscodes/MuseAmp/archive/refs/tags/v1.0.0.zip",
-          "sha256": "3ed6f871928ba0edaaa3cbfdf57743f151e19245d8da9f1764a04a94d758a654"
+          "sha256": "522b0d74d8aaaa582e8dce2d5475477810e99c44d7dedc09662c0b952d07273f"
         }
       ]
     }
