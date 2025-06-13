@@ -27,6 +27,11 @@
         <p>Initial Flatpak release.</p>
       </description>
     </release>
+    <release version="1.1.0" date="2025-06-13">
+      <description>
+        <p>Added toggle to not modify file directly.</p>
+      </description>
+    </release>
   </releases>
   
   <recommends>
