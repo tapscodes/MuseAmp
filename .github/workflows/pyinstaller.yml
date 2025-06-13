@@ -57,6 +57,12 @@ jobs:
           name: MuseAmpWindows
           path: dist/MuseAmpWindows.exe
 
+      - name: Upload to GitHub Release
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/MuseAmpWindows.exe
+
   build-linux:
     runs-on: ubuntu-latest
     steps:
@@ -102,6 +108,12 @@ jobs:
         with:
           name: MuseAmpLinux
           path: dist/MuseAmpLinux
+
+      - name: Upload to GitHub Release
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/MuseAmpLinux
 
   build-macos:
     runs-on: macos-latest
@@ -155,4 +167,10 @@ jobs:
         with:
           name: MuseAmpMacOS-${{ matrix.arch }}
           path: dist/MuseAmpMacOS
+
+      - name: Upload to GitHub Release
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/MuseAmpMacOS
 
