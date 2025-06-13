@@ -1,4 +1,4 @@
-name: Build with PyInstaller
+name: Build executables with PyInstaller and upload to Releases
 
 on:
   push:
@@ -11,63 +11,36 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
     steps:
-      - name: checkout repo
-        uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: set up python
-        uses: actions/setup-python@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: '3.11'
 
-      # --- Download RSgain and FFmpeg (Linux) ---
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller PySide6 mutagen
+
+      # --- Linux: Download RSgain and FFmpeg ---
       - name: Download RSgain and FFmpeg (Linux)
-        if: matrix.os == 'ubuntu-latest'
+        if: runner.os == 'Linux'
         run: |
           wget https://github.com/complexlogic/rsgain/releases/download/v3.6/rsgain-3.6-Linux.tar.xz
           tar xf rsgain-3.6-Linux.tar.xz
-          cp rsgain-3.6-Linux/rsgain ./rsgain
-          wget https://github.com/BtbN/FFmpeg-Builds/releases/latest/download/ffmpeg-n7.1-latest-linux64-gpl-7.1.tar.xz
-          tar xf ffmpeg-n7.1-latest-linux64-gpl-7.1.tar.xz
-          cp ffmpeg-n7.1-latest-linux64-gpl-7.1/bin/ffmpeg ./ffmpeg
-          if [ ! -f rsgain ]; then
-            echo "Error: rsgain not found!"
-            exit 1
-          fi
-          if [ ! -f ffmpeg ]; then
-            echo "Error: ffmpeg not found!"
-            exit 1
-          fi
+          find . -type f -name rsgain -exec cp {} ./rsgain \;
+          wget https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2025-06-13-13-43/ffmpeg-n7.1.1-22-g0f1fe3d153-linux64-gpl-7.1.tar.xz
+          tar xf ffmpeg-n7.1.1-22-g0f1fe3d153-linux64-gpl-7.1.tar.xz
+          cp ffmpeg-n7.1.1-22-g0f1fe3d153-linux64-gpl-7.1/bin/ffmpeg ./ffmpeg
 
-      # --- Download RSgain and FFmpeg (macOS) ---
-      - name: Download RSgain and FFmpeg (macOS)
-        if: matrix.os == 'macos-latest'
-        run: |
-          ARCH=$(uname -m)
-          if [ "$ARCH" = "arm64" ]; then
-            curl --fail -LO https://github.com/complexlogic/rsgain/releases/download/v3.6/rsgain-3.6-macOS-arm64.zip
-            unzip rsgain-3.6-macOS-arm64.zip
-            mv rsgain-3.6-macOS-arm64/rsgain ./rsgain
-          else
-            curl --fail -LO https://github.com/complexlogic/rsgain/releases/download/v3.6/rsgain-3.6-macOS-x86_64.zip
-            unzip rsgain-3.6-macOS-x86_64.zip
-            mv rsgain-3.6-macOS-x86_64/rsgain ./rsgain
-          fi
-          curl --fail -Lo ffmpeg.zip https://evermeet.cx/ffmpeg/getrelease/zip
-          unzip ffmpeg.zip
-          if [ ! -f rsgain ]; then
-            echo "Error: rsgain not found!"
-            exit 1
-          fi
-          if [ ! -f ffmpeg ]; then
-            echo "Error: ffmpeg not found!"
-            exit 1
-          fi
-
-      # --- Download RSgain and FFmpeg (Windows) ---
+      # --- Windows: Download RSgain and FFmpeg ---
       - name: Download RSgain and FFmpeg (Windows)
-        if: matrix.os == 'windows-latest'
+        if: runner.os == 'Windows'
         shell: cmd
         run: |
           curl -LO https://github.com/complexlogic/rsgain/releases/download/v3.6/rsgain-3.6-win64.zip
@@ -81,53 +54,56 @@ jobs:
             echo "Error: rsgain.exe not found!"
             exit 1
           )
-          curl -LO https://github.com/BtbN/FFmpeg-Builds/releases/latest/download/ffmpeg-n7.1-latest-win64-gpl-7.1.zip
-          powershell -Command "Expand-Archive -Path ffmpeg-n7.1-latest-win64-gpl-7.1.zip -DestinationPath ffmpeg"
+          curl -LO https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2025-06-13-13-43/ffmpeg-n7.1.1-22-g0f1fe3d153-winarm64-gpl-7.1.zip
+          powershell -Command "Expand-Archive -Path ffmpeg-n7.1.1-22-g0f1fe3d153-winarm64-gpl-7.1.zip -DestinationPath ffmpeg"
           for /R ffmpeg %%i in (ffmpeg.exe) do (
             if exist "%%i" (
               copy "%%i" ffmpeg.exe
             )
           )
-          if not exist ffmpeg.exe (
-            echo "Error: ffmpeg.exe not found!"
-            exit 1
-          )
 
       - name: Rename rsgain.exe to rsgain (Windows)
-        if: matrix.os == 'windows-latest'
+        if: runner.os == 'Windows'
         shell: cmd
         run: |
           if exist rsgain.exe ren rsgain.exe rsgain
 
-      - name: install dependencies
+      # --- macOS: Download RSgain and FFmpeg ---
+      - name: Download RSgain and FFmpeg (macOS)
+        if: runner.os == 'macOS'
         run: |
-          python -m pip install --upgrade pip
-          pip install PySide6 pyinstaller
-
-      - name: build executable
-        shell: bash
-        run: |
-          if [ "${{ matrix.os }}" = "ubuntu-latest" ]; then
-            pyinstaller --onefile --add-binary "rsgain:." --add-binary "ffmpeg:." --name PrefferentialFLAC-Linux PreferrentialFLAC.py
-          elif [ "${{ matrix.os }}" = "macos-latest" ]; then
-            pyinstaller --onefile --add-binary "rsgain:." --add-binary "ffmpeg:." --name PrefferentialFLAC-MacOS PreferrentialFLAC.py
+          ARCH=$(uname -m)
+          if [ "$ARCH" = "arm64" ]; then
+            curl --fail -LO https://github.com/complexlogic/rsgain/releases/download/v3.6/rsgain-3.6-macOS-arm64.zip
+            unzip rsgain-3.6-macOS-arm64.zip
+            mv rsgain-3.6-macOS-arm64/rsgain ./rsgain
           else
-            pyinstaller --onefile --add-binary "rsgain;." --add-binary "ffmpeg.exe;." --name PrefferentialFLAC-Windows PreferrentialFLAC.py
+            curl --fail -LO https://github.com/complexlogic/rsgain/releases/download/v3.6/rsgain-3.6-macOS-x86_64.zip
+            unzip rsgain-3.6-macOS-x86_64.zip
+            mv rsgain-3.6-macOS-x86_64/rsgain ./rsgain
           fi
+          curl --fail -Lo ffmpeg.zip https://evermeet.cx/ffmpeg/getrelease/zip
+          unzip ffmpeg.zip
 
-      - name: set artifact name
-        shell: bash
+      # --- Build with PyInstaller ---
+      - name: Build with PyInstaller
         run: |
-          if [ "${{ matrix.os }}" = "ubuntu-latest" ]; then
-            echo "ARTIFACT=PrefferentialFLAC-Linux" >> $GITHUB_ENV
-          elif [ "${{ matrix.os }}" = "macos-latest" ]; then
-            echo "ARTIFACT=PrefferentialFLAC-MacOS" >> $GITHUB_ENV
-          else
-            echo "ARTIFACT=PrefferentialFLAC-Windows" >> $GITHUB_ENV
-          fi
+          pyinstaller --onefile --add-binary "rsgain:." --add-binary "ffmpeg:." MuseAmp.pyw
 
-      - name: upload artifact
+      # --- Upload artifact (Actions tab) ---
+      - name: Upload artifact (Actions tab)
+        if: github.event_name == 'push'
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.ARTIFACT }}
-          path: dist/PrefferentialFLAC-*
+          name: museamp-${{ runner.os }}
+          path: |
+            dist/*
+
+      # --- Upload to GitHub Releases (all platforms) ---
+      - name: Upload to GitHub Releases
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
