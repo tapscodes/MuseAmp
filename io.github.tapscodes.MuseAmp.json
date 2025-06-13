@@ -21,17 +21,7 @@
     "/share/doc",
     "/share/gtk-doc",
     "/share/man",
-    "/share/info",
-    "/.gitignore",
-    "/screenshot1.jpg",
-    "/screenshot2.jpg",
-    "/screenshot3.jpg",
-    "/setup.py",
-    "/README.md",
-    "/LICENSE",
-    "/MuseAmp.png",
-    "/MuseAmp.svg",
-    "/pyinstaller.yml"
+    "/share/info"
   ],
   "cleanup-commands": [
     "mkdir -p /app/lib/ffmpeg"
