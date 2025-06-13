@@ -97,9 +97,7 @@ jobs:
         with:
           name: museamp-${{ runner.os }}
           path: |
-            dist/MuseAmpLinux
-            dist/MuseAmpMacOS
-            dist/MuseAmpWindows.exe
+            ${{ runner.os == 'Linux' && 'dist/MuseAmpLinux' || runner.os == 'macOS' && 'dist/MuseAmpMacOS' || runner.os == 'Windows' && 'dist/MuseAmpWindows.exe' }}
 
       # --- Upload to GitHub Releases (all platforms) ---
       - name: Upload to GitHub Releases
@@ -107,8 +105,6 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            dist/MuseAmpLinux
-            dist/MuseAmpMacOS
-            dist/MuseAmpWindows.exe
+            ${{ runner.os == 'Linux' && 'dist/MuseAmpLinux' || runner.os == 'macOS' && 'dist/MuseAmpMacOS' || runner.os == 'Windows' && 'dist/MuseAmpWindows.exe' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
