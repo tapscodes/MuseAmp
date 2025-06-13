@@ -3,6 +3,7 @@
   <id>io.github.tapscodes.MuseAmp</id>
   
   <name>MuseAmp</name>
+  <developer_name>tapscodes</developer_name>
   <summary>An audio level normalizer/amplifier for MP3 and FLAC files</summary>
   
   <metadata_license>CC0-1.0</metadata_license>
@@ -24,7 +25,7 @@
   <url type="contribute">https://github.com/tapscodes/MuseAmp</url>
 
   <releases>
-    <release version="1.0.0" date="2025-06-05">
+    <release version="1.0.0" date="2025-06-12">
       <description>
         <p>Initial Flatpak release.</p>
       </description>
@@ -58,17 +59,20 @@
   
   <screenshots>
     <screenshot type="default">
+      <caption>Main Window</caption>
       <image>https://github.com/tapscodes/MuseAmp/blob/main/screenshot1.jpg?raw=true</image>
     </screenshot>
     <screenshot>
+      <caption>Window In Progress</caption>
       <image>https://github.com/tapscodes/MuseAmp/blob/main/screenshot2.jpg?raw=true</image>
     </screenshot>
     <screenshot>
+      <caption>Window Of Completion</caption>
       <image>https://github.com/tapscodes/MuseAmp/blob/main/screenshot3.jpg?raw=true</image>
     </screenshot>
   </screenshots>
   
-  <icon type="cached">io.github.tapscodes.MuseAmp</icon>
+  <icon>io.github.tapscodes.MuseAmp</icon>
   
   <categories>
     <category>Audio</category>
