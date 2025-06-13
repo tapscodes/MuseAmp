@@ -162,21 +162,32 @@ class ApplyGainWorker(QObject):
         self.table = table
         self.supported_filetypes = supported_filetypes
         self.create_modified = create_modified
+        self.output_dir = None  # Will be set by GUI if needed
 
     def run(self):
         error_logs = []
         total = len(self.files)
-        # Create output directory if needed
+        # Use output_dir from GUI if provided
         output_dir = None
         if self.create_modified and self.files:
-            first_file = Path(self.files[0])
-            output_dir = first_file.parent / "museamp modified"
-            try:
-                output_dir.mkdir(exist_ok=True)
-            except Exception as e:
-                error_logs.append(f"Failed to create output directory '{output_dir}': {e}")
-                self.finished.emit(error_logs, [])
-                return
+            if hasattr(self, "output_dir") and self.output_dir:
+                output_dir = Path(self.output_dir)
+                try:
+                    output_dir.mkdir(exist_ok=True)
+                except Exception as e:
+                    error_logs.append(f"Failed to create output directory '{output_dir}': {e}")
+                    self.finished.emit(error_logs, [])
+                    return
+            else:
+                # fallback: use default location if not set
+                first_file = Path(self.files[0])
+                output_dir = first_file.parent / "museamp_modified"
+                try:
+                    output_dir.mkdir(exist_ok=True)
+                except Exception as e:
+                    error_logs.append(f"Failed to create output directory '{output_dir}': {e}")
+                    self.finished.emit(error_logs, [])
+                    return
 
         for idx, file_path in enumerate(self.files):
             ext = Path(file_path).suffix.lower()
@@ -223,7 +234,7 @@ class ApplyGainWorker(QObject):
 
             # Determine output file path
             out_file = file_path
-            if self.create_modified:
+            if self.create_modified and output_dir:
                 p = Path(file_path)
                 out_file = str(output_dir / p.name)
 
@@ -278,7 +289,7 @@ class ApplyGainWorker(QObject):
             ext = Path(file_path).suffix.lower()
             # For modified output, analyze the output file, not the original
             analyze_path = file_path
-            if self.create_modified:
+            if self.create_modified and output_dir:
                 p = Path(file_path)
                 analyze_path = str(output_dir / p.name)
             if ext not in self.supported_filetypes:

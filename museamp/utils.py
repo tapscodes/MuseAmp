@@ -1,4 +1,4 @@
-#utility functions for MuseAmp
+#utility functions for museamp
 
 from pathlib import Path
 
@@ -30,3 +30,20 @@ def get_files_in_folder(folder):
         str(p) for p in folder.rglob("*")
         if p.is_file() and is_supported_filetype(p)
     ]
+
+def find_supported_files(folder, supported_filetypes, recursive=True, already_listed=None):
+    #find supported files in a folder, optionally recursively, skipping already_listed
+    from pathlib import Path
+    import os
+    files = []
+    already_listed = already_listed or set()
+    if recursive:
+        for path in Path(folder).rglob("*"):
+            if path.is_file() and path.suffix.lower() in supported_filetypes and str(path) not in already_listed:
+                files.append(str(path))
+    else:
+        for filename in os.listdir(folder):
+            path = Path(folder) / filename
+            if path.is_file() and path.suffix.lower() in supported_filetypes and str(path) not in already_listed:
+                files.append(str(path))
+    return files

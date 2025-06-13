@@ -10,12 +10,15 @@ from PySide6.QtWidgets import (
 from PySide6.QtGui import QIntValidator, QIcon
 from PySide6.QtCore import Qt, QThread
 from .workers import Worker, AddFilesWorker, ApplyGainWorker
+from .utils import find_supported_files
 
+#supported filetypes for museamp
 supported_filetypes = {".flac", ".mp3"}
 
 class ErrorLogDialog(QDialog):
     def __init__(self, log_text, parent=None):
         super().__init__(parent)
+        #set error log dialog properties
         self.setWindowTitle("Error Log")
         self.setMinimumSize(400, 300)
         layout = QVBoxLayout(self)
@@ -32,13 +35,14 @@ class ErrorLogDialog(QDialog):
         copy_btn.clicked.connect(self.copy_log)
         ok_btn.clicked.connect(self.accept)
     def copy_log(self):
+        #copy error log to clipboard
         clipboard = QApplication.clipboard()
         clipboard.setText(self.text_edit.toPlainText())
 
 class AudioToolGUI(QWidget):
     def __init__(self):
         super().__init__()
-        #set basic window properties
+        #set main window properties
         self.setWindowTitle("MuseAmp")
         self.setMinimumSize(700, 500)
         self.layout = QVBoxLayout(self)  #main vertical layout
@@ -64,19 +68,24 @@ class AudioToolGUI(QWidget):
         #textbox for replaygain value input
         self.replaygain_input = QLineEdit()
         self.replaygain_input.setFixedWidth(50) #fix width for neatness
-        self.replaygain_input.setText("18") #default ReplayGain 2.0 LUFS value (positive version)
+        self.replaygain_input.setText("18") #default replaygain 2.0 lufs value (positive version)
         self.replaygain_input.setValidator(QIntValidator(5, 30, self))  #allow only 5 to 30
 
-        # Add checkbox for "Create modified copy"
-        self.create_modified_checkbox = QCheckBox("Create modified copy in folder instead of modifying file directly")
+        #add checkbox for "create copy of file(s)"
+        self.create_modified_checkbox = QCheckBox("Create copy of file(s) instead of modifying in-place")
         self.create_modified_checkbox.setChecked(False)
+        self.create_modified_folder = None  #store user-selected folder
 
-        # layout for LUFS label + input
+        #add checkbox for "search subfolders"
+        self.search_subfolders_checkbox = QCheckBox("Search subfolders")
+        self.search_subfolders_checkbox.setChecked(True)
+
+        #layout for lufs label + input
         self.replaygain_layout = QHBoxLayout()
         self.replaygain_layout.addWidget(self.replaygain_label)
         self.replaygain_layout.addWidget(self.replaygain_input)
 
-        # horizontal layout for buttons
+        #horizontal layout for buttons
         self.button_layout = QHBoxLayout()
         for btn in [
             self.add_files_btn, self.add_folder_btn,
@@ -84,10 +93,11 @@ class AudioToolGUI(QWidget):
         ]:
             self.button_layout.addWidget(btn)
 
-        # new layout for LUFS + checkbox (second row)
+        #new layout for lufs + checkboxes (second row)
         self.options_layout = QHBoxLayout()
         self.options_layout.addLayout(self.replaygain_layout)
         self.options_layout.addWidget(self.create_modified_checkbox)
+        self.options_layout.addWidget(self.search_subfolders_checkbox)
         self.options_layout.addStretch(1)
 
         #progress bar defaulting to 100
@@ -153,13 +163,14 @@ class AudioToolGUI(QWidget):
             return
         self.set_ui_enabled(False)
         self.set_progress(0)
-        files_to_add = []
-        #check to see if supported file type
-        for root, _, files in os.walk(folder):
-            for filename in files:
-                path = Path(root) / filename
-                if path.suffix.lower() in supported_filetypes and not self.is_already_listed(str(path)):
-                    files_to_add.append(str(path))
+        already_listed = {self.table.item(row, 0).text() for row in range(self.table.rowCount())}
+        #use utility to find supported files
+        files_to_add = find_supported_files(
+            folder,
+            supported_filetypes,
+            recursive=self.search_subfolders_checkbox.isChecked(),
+            already_listed=already_listed
+        )
         #insert items into rows now, do not scan yet, just set "-" for columns
         start_row = self.table.rowCount()
         for file_path in files_to_add:
@@ -186,7 +197,7 @@ class AudioToolGUI(QWidget):
         self.table.setItem(row, 0, QTableWidgetItem(str(path))) #file path
         self.table.setItem(row, 1, QTableWidgetItem(path.suffix.lower()))   #extension
 
-        #scan for existing ReplayGain tags
+        #scan for existing replaygain tags
         loudness_val = "-"
         replaygain_val = "-"
         clipping_val = "-"
@@ -263,7 +274,7 @@ class AudioToolGUI(QWidget):
         self.progress_bar.setValue(percent)
         self.progress_bar.setFormat(f"{percent}%")
 
-    #analyze and tag files (ReplayGain)
+    #analyze and tag files (replaygain)
     def analyze_and_tag(self):
         files = []
         for row in range(self.table.rowCount()):
@@ -272,7 +283,7 @@ class AudioToolGUI(QWidget):
             QMessageBox.information(self, "No Files", "No files to analyze.")
             return
 
-        # Only show warning if not creating modified copy
+        #only show warning if not creating modified copy
         if not self.create_modified_checkbox.isChecked():
             reply = QMessageBox.question(
                 self,
@@ -286,7 +297,23 @@ class AudioToolGUI(QWidget):
                 self.set_progress(100)
                 return
 
-        #get user input for LUFS from textbox
+        #prompt for folder if creating modified copy
+        if self.create_modified_checkbox.isChecked():
+            QMessageBox.information(
+                self,
+                "Select Folder",
+                "Please select where you'd like to create the folder to store your modified music files."
+            )
+            folder = QFileDialog.getExistingDirectory(self, "Select folder to save modified files in")
+            if not folder:
+                QMessageBox.warning(self, "No Folder Selected", "Operation cancelled: No folder selected for modified files.")
+                self.set_ui_enabled(True)
+                self.set_progress(100)
+                return
+            #always use a subfolder 'museamp_modified' inside the selected folder
+            self.create_modified_folder = str(Path(folder) / "museamp_modified")
+
+        #get user input for lufs from textbox
         try:
             lufs = int(self.replaygain_input.text())
         except Exception:
@@ -304,6 +331,8 @@ class AudioToolGUI(QWidget):
             files, lufs,
             create_modified=self.create_modified_checkbox.isChecked()
         )
+        if self.create_modified_checkbox.isChecked():
+            self.worker.output_dir = self.create_modified_folder
         self.worker.overwrite_rg = True
         self.worker.moveToThread(self.worker_thread)
         self.worker_thread.started.connect(self.worker.run)
@@ -336,7 +365,7 @@ class AudioToolGUI(QWidget):
         if not files:
             return
 
-        # Only show warning if not creating modified copy
+        #only show warning if not creating modified copy
         if not self.create_modified_checkbox.isChecked():
             reply = QMessageBox.question(
                 self,
@@ -348,7 +377,23 @@ class AudioToolGUI(QWidget):
             if reply != QMessageBox.Yes:
                 return
 
-        #get LUFS value from user input
+        #prompt for folder if creating modified copy
+        if self.create_modified_checkbox.isChecked():
+            QMessageBox.information(
+                self,
+                "Select Folder",
+                "Please select where you'd like to create the folder to store your modified music files."
+            )
+            folder = QFileDialog.getExistingDirectory(self, "Select folder to save modified files in")
+            if not folder:
+                QMessageBox.warning(self, "No Folder Selected", "Operation cancelled: No folder selected for modified files.")
+                self.set_ui_enabled(True)
+                self.set_progress(100)
+                return
+            #always use a subfolder 'museamp_modified' inside the selected folder
+            self.create_modified_folder = str(Path(folder) / "museamp_modified")
+
+        #get lufs value from user input
         try:
             lufs = int(self.replaygain_input.text())
         except Exception:
@@ -366,6 +411,8 @@ class AudioToolGUI(QWidget):
             files, lufs, self.table, supported_filetypes,
             create_modified=self.create_modified_checkbox.isChecked()
         )
+        if self.create_modified_checkbox.isChecked():
+            self.gain_worker.output_dir = self.create_modified_folder
         self.gain_worker.moveToThread(self.gain_worker_thread)
         self.gain_worker.progress.connect(self.set_progress)
         self.gain_worker.finished.connect(self._on_apply_gain_finished)
@@ -381,7 +428,7 @@ class AudioToolGUI(QWidget):
             self.table.setItem(idx, 2, QTableWidgetItem(loudness_val))
             self.table.setItem(idx, 3, QTableWidgetItem(replaygain_val))
             self.table.setItem(idx, 4, QTableWidgetItem(clipping_val))
-        #re-enable UI and set progress to 100%
+        #re-enable ui and set progress to 100%
         self.set_ui_enabled(True)
         self.set_progress(100)
         #show error log dialog if there were any errors
