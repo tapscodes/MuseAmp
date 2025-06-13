@@ -1,5 +1,8 @@
 name: Build MuseAmp Executables
 
+permissions:
+  contents: write
+
 on:
   workflow_dispatch:
   push:
@@ -173,4 +176,3 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: dist/MuseAmpMacOS
-
