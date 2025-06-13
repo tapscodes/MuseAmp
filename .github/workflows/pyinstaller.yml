@@ -3,8 +3,6 @@ name: Build executables with PyInstaller and upload to Releases
 on:
   push:
     branches: [ main ]
-  release:
-    types: [published]
 
 jobs:
   build:
@@ -89,11 +87,11 @@ jobs:
       - name: Build with PyInstaller
         run: |
           if [ "${{ matrix.os }}" = "ubuntu-latest" ]; then
-            pyinstaller --onefile --name MuseAmpLinux --add-binary "rsgain:." --add-binary "ffmpeg:." MuseAmp.pyw
+            pyinstaller --onefile --add-binary "rsgain:." --add-binary "ffmpeg:." --name MuseAmpLinux MuseAmp.pyw
           elif [ "${{ matrix.os }}" = "macos-latest" ]; then
-            pyinstaller --onefile --name MuseAmpMacOS --add-binary "rsgain:." --add-binary "ffmpeg:." MuseAmp.pyw
+            pyinstaller --onefile --add-binary "rsgain:." --add-binary "ffmpeg:." --name MuseAmpMacOS MuseAmp.pyw
           elif [ "${{ matrix.os }}" = "windows-latest" ]; then
-            pyinstaller --onefile --name MuseAmpWindows --add-binary "rsgain;." --add-binary "ffmpeg;." MuseAmp.pyw
+            pyinstaller --onefile --add-binary "rsgain;." --add-binary "ffmpeg;." --name MuseAmpWindows MuseAmp.pyw
           fi
 
       # --- Upload artifact (Actions tab) ---
@@ -101,16 +99,5 @@ jobs:
         if: github.event_name == 'push'
         uses: actions/upload-artifact@v4
         with:
-          name: museamp-${{ matrix.os == 'ubuntu-latest' && 'Linux' || (matrix.os == 'macos-latest' && 'MacOS' || 'Windows') }}
-          path: |
-            ${{ matrix.os == 'ubuntu-latest' && 'dist/MuseAmpLinux' || (matrix.os == 'macos-latest' && 'dist/MuseAmpMacOS' || 'dist/MuseAmpWindows.exe') }}
-
-      # --- Upload to GitHub Releases (all platforms) ---
-      - name: Upload to GitHub Releases
-        if: github.event_name == 'release'
-        uses: softprops/action-gh-release@v2
-        with:
-          files: |
-            ${{ matrix.os == 'ubuntu-latest' && 'dist/MuseAmpLinux' || (matrix.os == 'macos-latest' && 'dist/MuseAmpMacOS' || 'dist/MuseAmpWindows.exe') }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          name: MuseAmp-${{ matrix.os == 'ubuntu-latest' && 'Linux' || (matrix.os == 'macos-latest' && 'MacOS' || 'Windows') }}
+          path: dist/MuseAmp-*
