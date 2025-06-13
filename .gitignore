@@ -8,6 +8,7 @@ builder-dir/
 
 # Repository directory
 repo-dir/
+repo/
 
 # Python virtual environment
 .venv/

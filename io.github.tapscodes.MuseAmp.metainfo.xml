@@ -1,18 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop-application">
   <id>io.github.tapscodes.MuseAmp</id>
-  
   <name>MuseAmp</name>
-  <developer_name>tapscodes</developer_name>
   <summary>An audio level normalizer/amplifier for MP3 and FLAC files</summary>
   
+  <developer id="io.github">
+    <name>tapscodes</name>
+  </developer>
+
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>BSD-3-Clause</project_license>
-  
-  <developer>
-    <name>tapscodes</name>
-    <url>https://github.com/tapscodes</url>
-  </developer>
 
   <content_rating type="oars-1.0"/>
   
@@ -71,8 +68,6 @@
       <image>https://github.com/tapscodes/MuseAmp/blob/main/screenshot3.jpg?raw=true</image>
     </screenshot>
   </screenshots>
-  
-  <icon>io.github.tapscodes.MuseAmp</icon>
   
   <categories>
     <category>Audio</category>
