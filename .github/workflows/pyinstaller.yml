@@ -33,7 +33,8 @@ jobs:
         run: |
           wget https://github.com/complexlogic/rsgain/releases/download/v3.6/rsgain-3.6-Linux.tar.xz
           tar xf rsgain-3.6-Linux.tar.xz
-          find . -type f -name rsgain -exec cp {} ./rsgain \;
+          # rsgain is in the root of the extracted folder
+          cp rsgain-3.6-Linux/rsgain ./rsgain
           wget https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2025-06-13-13-43/ffmpeg-n7.1.1-22-g0f1fe3d153-linux64-gpl-7.1.tar.xz
           tar xf ffmpeg-n7.1.1-22-g0f1fe3d153-linux64-gpl-7.1.tar.xz
           cp ffmpeg-n7.1.1-22-g0f1fe3d153-linux64-gpl-7.1/bin/ffmpeg ./ffmpeg
@@ -53,22 +54,20 @@ jobs:
         run: |
           curl -LO https://github.com/complexlogic/rsgain/releases/download/v3.6/rsgain-3.6-win64.zip
           powershell -Command "Expand-Archive -Path rsgain-3.6-win64.zip -DestinationPath rsgain-win64"
-          dir rsgain-win64 /s
-          for /r rsgain-win64 %%f in (rsgain.exe) do copy "%%f" rsgain.exe
+          copy rsgain-win64\rsgain.exe rsgain.exe
           if exist rsgain.exe (
-            echo rsgain.exe found and copied to working directory.
+            echo rsgain.exe found in root and copied to working directory.
           ) else (
-            echo Error: rsgain.exe not found!
+            echo Error: rsgain.exe not found in root directory!
             exit 1
           )
           curl -LO https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2025-06-13-13-43/ffmpeg-n7.1.1-22-g0f1fe3d153-winarm64-gpl-7.1.zip
           powershell -Command "Expand-Archive -Path ffmpeg-n7.1.1-22-g0f1fe3d153-winarm64-gpl-7.1.zip -DestinationPath ffmpeg"
-          dir ffmpeg /s
-          for /r ffmpeg %%f in (ffmpeg.exe) do copy "%%f" ffmpeg.exe
+          copy ffmpeg\ffmpeg.exe ffmpeg.exe
           if exist ffmpeg.exe (
-            echo ffmpeg.exe found and copied to working directory.
+            echo ffmpeg.exe found in root and copied to working directory.
           ) else (
-            echo Error: ffmpeg.exe not found!
+            echo Error: ffmpeg.exe not found in root directory!
             exit 1
           )
 
