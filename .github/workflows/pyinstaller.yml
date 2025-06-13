@@ -1,103 +1,156 @@
-name: Build executables with PyInstaller and upload to Releases
+name: Build MuseAmp Executables
 
 on:
+  workflow_dispatch:
   push:
+    branches: [ main ]
+  pull_request:
     branches: [ main ]
 
 jobs:
-  build:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-
+  build-windows:
+    runs-on: windows-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: '3.10'
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pyinstaller PySide6 mutagen
+          pip install PySide6 mutagen pyinstaller
 
-      # --- Linux: Download RSgain and FFmpeg ---
-      - name: Download RSgain and FFmpeg (Linux)
-        if: matrix.os == 'ubuntu-latest'
+      - name: Download ffmpeg
         run: |
-          wget https://github.com/complexlogic/rsgain/releases/download/v3.6/rsgain-3.6-Linux.tar.xz
-          tar xf rsgain-3.6-Linux.tar.xz
-          find . -type f -name rsgain -exec cp {} ./rsgain \;
-          wget https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2025-06-13-13-43/ffmpeg-n7.1.1-22-g0f1fe3d153-linux64-gpl-7.1.tar.xz
-          tar xf ffmpeg-n7.1.1-22-g0f1fe3d153-linux64-gpl-7.1.tar.xz
-          cp ffmpeg-n7.1.1-22-g0f1fe3d153-linux64-gpl-7.1/bin/ffmpeg ./ffmpeg
+          curl -L -o ffmpeg.zip https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2025-06-13-13-43/ffmpeg-n7.1.1-22-g0f1fe3d153-winarm64-gpl-7.1.zip
+          tar -xf ffmpeg.zip || powershell -c "Expand-Archive ffmpeg.zip ."
+        shell: bash
 
-      # --- Windows: Download RSgain and FFmpeg ---
-      - name: Download RSgain and FFmpeg (Windows)
-        if: matrix.os == 'windows-latest'
-        shell: cmd
+      - name: Download rsgain
         run: |
-          curl -LO https://github.com/complexlogic/rsgain/releases/download/v3.6/rsgain-3.6-win64.zip
-          powershell -Command "Expand-Archive -Path rsgain-3.6-win64.zip -DestinationPath rsgain-win64"
-          for /R rsgain-win64 %%i in (rsgain.exe) do (
-            if exist "%%i" (
-              copy "%%i" rsgain.exe
-            )
-          )
-          if not exist rsgain.exe (
-            echo "Error: rsgain.exe not found!"
-            exit 1
-          )
-          curl -LO https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2025-06-13-13-43/ffmpeg-n7.1.1-22-g0f1fe3d153-winarm64-gpl-7.1.zip
-          powershell -Command "Expand-Archive -Path ffmpeg-n7.1.1-22-g0f1fe3d153-winarm64-gpl-7.1.zip -DestinationPath ffmpeg"
-          for /R ffmpeg %%i in (ffmpeg.exe) do (
-            if exist "%%i" (
-              copy "%%i" ffmpeg.exe
-            )
-          )
+          curl -L -o rsgain.zip https://github.com/complexlogic/rsgain/releases/download/v3.6/rsgain-3.6-win64.zip
+          tar -xf rsgain.zip || powershell -c "Expand-Archive rsgain.zip ."
+        shell: bash
 
-      - name: Rename rsgain.exe to rsgain (Windows)
-        if: matrix.os == 'windows-latest'
-        shell: cmd
+      - name: Copy binaries to app folder
         run: |
-          if exist rsgain.exe ren rsgain.exe rsgain
+          mkdir -p museamp_binaries
+          # Find ffmpeg.exe and rsgain.exe and copy to museamp_binaries
+          cp $(find . -iname ffmpeg.exe | head -n1) museamp_binaries/ffmpeg.exe
+          cp $(find . -iname rsgain.exe | head -n1) museamp_binaries/rsgain.exe
+        shell: bash
 
-      # --- macOS: Download RSgain and FFmpeg ---
-      - name: Download RSgain and FFmpeg (macOS)
-        if: matrix.os == 'macos-latest'
-        run: |
-          ARCH=$(uname -m)
-          if [ "$ARCH" = "arm64" ]; then
-            curl --fail -LO https://github.com/complexlogic/rsgain/releases/download/v3.6/rsgain-3.6-macOS-arm64.zip
-            unzip rsgain-3.6-macOS-arm64.zip
-            mv rsgain-3.6-macOS-arm64/rsgain ./rsgain
-          else
-            curl --fail -LO https://github.com/complexlogic/rsgain/releases/download/v3.6/rsgain-3.6-macOS-x86_64.zip
-            unzip rsgain-3.6-macOS-x86_64.zip
-            mv rsgain-3.6-macOS-x86_64/rsgain ./rsgain
-          fi
-          curl --fail -Lo ffmpeg.zip https://evermeet.cx/ffmpeg/getrelease/zip
-          unzip ffmpeg.zip
-
-      # --- Build with PyInstaller ---
       - name: Build with PyInstaller
         run: |
-          if [ "${{ matrix.os }}" = "ubuntu-latest" ]; then
-            pyinstaller --onefile --add-binary "rsgain:." --add-binary "ffmpeg:." --name MuseAmpLinux MuseAmp.pyw
-          elif [ "${{ matrix.os }}" = "macos-latest" ]; then
-            pyinstaller --onefile --add-binary "rsgain:." --add-binary "ffmpeg:." --name MuseAmpMacOS MuseAmp.pyw
-          elif [ "${{ matrix.os }}" = "windows-latest" ]; then
-            pyinstaller --onefile --add-binary "rsgain;." --add-binary "ffmpeg;." --name MuseAmpWindows MuseAmp.pyw
-          fi
+          pyinstaller MuseAmp.pyw --name MuseAmpWindows --onefile --add-data "museamp_binaries;."
+        env:
+          PYTHONPATH: .
 
-      # --- Upload artifact (Actions tab) ---
-      - name: Upload artifact (Actions tab)
-        if: github.event_name == 'push'
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: MuseAmp-${{ matrix.os == 'ubuntu-latest' && 'Linux' || (matrix.os == 'macos-latest' && 'MacOS' || 'Windows') }}
-          path: dist/MuseAmp-*
+          name: MuseAmpWindows
+          path: dist/MuseAmpWindows.exe
+
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install PySide6 mutagen pyinstaller
+
+      - name: Download ffmpeg
+        run: |
+          curl -L -o ffmpeg.tar.xz https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2025-06-13-13-43/ffmpeg-n7.1.1-22-g0f1fe3d153-linux64-gpl-7.1.tar.xz
+          tar -xf ffmpeg.tar.xz
+        shell: bash
+
+      - name: Download rsgain
+        run: |
+          curl -L -o rsgain.tar.xz https://github.com/complexlogic/rsgain/releases/download/v3.6/rsgain-3.6-Linux.tar.xz
+          tar -xf rsgain.tar.xz
+        shell: bash
+
+      - name: Copy binaries to app folder
+        run: |
+          mkdir -p museamp_binaries
+          cp $(find . -type f -executable -name ffmpeg | head -n1) museamp_binaries/ffmpeg
+          cp $(find . -type f -executable -name rsgain | head -n1) museamp_binaries/rsgain
+        shell: bash
+
+      - name: Build with PyInstaller
+        run: |
+          pyinstaller MuseAmp.pyw --name MuseAmpLinux --onefile --add-data "museamp_binaries:."
+        env:
+          PYTHONPATH: .
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: MuseAmpLinux
+          path: dist/MuseAmpLinux
+
+  build-macos:
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        arch: [x86_64, arm64]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install PySide6 mutagen pyinstaller
+
+      - name: Download ffmpeg
+        run: |
+          curl -L -o ffmpeg.zip https://evermeet.cx/ffmpeg/getrelease/zip
+          unzip -o ffmpeg.zip
+        shell: bash
+
+      - name: Download rsgain
+        run: |
+          if [ "${{ matrix.arch }}" = "x86_64" ]; then
+            curl -L -o rsgain.zip https://github.com/complexlogic/rsgain/releases/download/v3.6/rsgain-3.6-macOS-x86_64.zip
+          else
+            curl -L -o rsgain.zip https://github.com/complexlogic/rsgain/releases/download/v3.6/rsgain-3.6-macOS-arm64.zip
+          fi
+          unzip -o rsgain.zip
+        shell: bash
+
+      - name: Copy binaries to app folder
+        run: |
+          mkdir -p museamp_binaries
+          cp $(find . -type f -name ffmpeg | head -n1) museamp_binaries/ffmpeg
+          cp $(find . -type f -name rsgain | head -n1) museamp_binaries/rsgain
+        shell: bash
+
+      - name: Build with PyInstaller
+        run: |
+          pyinstaller MuseAmp.pyw --name MuseAmpMacOS --onefile --add-data "museamp_binaries:."
+        env:
+          PYTHONPATH: .
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: MuseAmpMacOS-${{ matrix.arch }}
+          path: dist/MuseAmpMacOS
+
