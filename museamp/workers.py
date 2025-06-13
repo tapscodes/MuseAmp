@@ -16,6 +16,7 @@ class Worker(QObject):
         self.files = files
         self.lufs = lufs
         self.create_modified = create_modified
+        self.output_dir = None  #set by gui if needed
 
     def run(self):
         updates = []
@@ -29,6 +30,29 @@ class Worker(QObject):
                 percent = 100
             self.progress.emit(percent)
 
+        #handle output_dir for create_modified
+        output_dir = None
+        if self.create_modified:
+            if hasattr(self, "output_dir") and self.output_dir:
+                output_dir = Path(self.output_dir)
+                try:
+                    output_dir.mkdir(exist_ok=True)
+                except Exception as e:
+                    error_logs.append(f"Failed to create output directory '{output_dir}': {e}")
+                    self.finished.emit([], error_logs)
+                    return
+            else:
+                #fallback: use default location if not set
+                if self.files:
+                    first_file = Path(self.files[0])
+                    output_dir = first_file.parent / "museamp_modified"
+                    try:
+                        output_dir.mkdir(exist_ok=True)
+                    except Exception as e:
+                        error_logs.append(f"Failed to create output directory '{output_dir}': {e}")
+                        self.finished.emit([], error_logs)
+                        return
+
         for row, file_path in enumerate(self.files):
             ext = Path(file_path).suffix.lower()
             if ext not in supported_filetypes:
@@ -37,9 +61,21 @@ class Worker(QObject):
                 emit_progress()
                 continue
             out_file = file_path
-            if self.create_modified:
+            if self.create_modified and output_dir:
                 p = Path(file_path)
-                out_file = str(p.with_stem(p.stem + "_modified"))
+                #copy the file to the output_dir before tagging
+                out_file = str(output_dir / p.name)
+                if not Path(out_file).exists():
+                    try:
+                        #copy file before tagging
+                        with open(file_path, "rb") as src, open(out_file, "wb") as dst:
+                            dst.write(src.read())
+                    except Exception as e:
+                        error_logs.append(f"Failed to copy file '{file_path}' to '{out_file}': {e}")
+                        updates.append((row, "-", "-", "-"))
+                        processed += 1
+                        emit_progress()
+                        continue
             lufs_str = f"-{abs(int(self.lufs))}" if self.lufs is not None else "-18"
             loudness_val = "-"
             replaygain_val = "-"
@@ -77,9 +113,9 @@ class Worker(QObject):
                             else:
                                 clipping_val = clip_val
                 else:
-                    error_logs.append(f"{file_path}:\n{proc.stderr or proc.stdout}")
+                    error_logs.append(f"{out_file}:\n{proc.stderr or proc.stdout}")
             except Exception as e:
-                error_logs.append(f"{file_path}: {str(e)}")
+                error_logs.append(f"{out_file}: {str(e)}")
             updates.append((row, loudness_val, replaygain_val, clipping_val))
             processed += 1
             emit_progress()

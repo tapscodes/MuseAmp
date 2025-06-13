@@ -302,7 +302,7 @@ class AudioToolGUI(QWidget):
             QMessageBox.information(
                 self,
                 "Select Folder",
-                "Please select where you'd like to create the folder to store your modified music files."
+                "Please select where you'd like to create the folder called 'museamp modified' to store your modified music files."
             )
             folder = QFileDialog.getExistingDirectory(self, "Select folder to save modified files in")
             if not folder:
@@ -382,7 +382,7 @@ class AudioToolGUI(QWidget):
             QMessageBox.information(
                 self,
                 "Select Folder",
-                "Please select where you'd like to create the folder to store your modified music files."
+                "Please select where you'd like to create the folder called 'museamp modified' to store your modified music files."
             )
             folder = QFileDialog.getExistingDirectory(self, "Select folder to save modified files in")
             if not folder:
