@@ -11,10 +11,11 @@ class Worker(QObject):
     finished = Signal(list, list)   #updates, error_logs
     progress = Signal(int)  #percent complete
 
-    def __init__(self, files, lufs=None):
+    def __init__(self, files, lufs=None, create_modified=False):
         super().__init__()
         self.files = files
         self.lufs = lufs
+        self.create_modified = create_modified
 
     def run(self):
         updates = []
@@ -35,12 +36,16 @@ class Worker(QObject):
                 processed += 1
                 emit_progress()
                 continue
+            out_file = file_path
+            if self.create_modified:
+                p = Path(file_path)
+                out_file = str(p.with_stem(p.stem + "_modified"))
             lufs_str = f"-{abs(int(self.lufs))}" if self.lufs is not None else "-18"
             loudness_val = "-"
             replaygain_val = "-"
             clipping_val = "-"
             rsgain_cmd = [
-                "rsgain", "custom", "-s", "i", "-l", lufs_str, "-O", file_path
+                "rsgain", "custom", "-s", "i", "-l", lufs_str, "-O", out_file
             ]
             if hasattr(self, "overwrite_rg") and not self.overwrite_rg:
                 rsgain_cmd.insert(2, "-S")
@@ -150,16 +155,29 @@ class ApplyGainWorker(QObject):
     finished = Signal(list, list)  #error_logs, analysis_results
     progress = Signal(int)   #percent
 
-    def __init__(self, files, lufs, table, supported_filetypes):
+    def __init__(self, files, lufs, table, supported_filetypes, create_modified=False):
         super().__init__()
         self.files = files
         self.lufs = lufs
         self.table = table
         self.supported_filetypes = supported_filetypes
+        self.create_modified = create_modified
 
     def run(self):
         error_logs = []
         total = len(self.files)
+        # Create output directory if needed
+        output_dir = None
+        if self.create_modified and self.files:
+            first_file = Path(self.files[0])
+            output_dir = first_file.parent / "museamp modified"
+            try:
+                output_dir.mkdir(exist_ok=True)
+            except Exception as e:
+                error_logs.append(f"Failed to create output directory '{output_dir}': {e}")
+                self.finished.emit(error_logs, [])
+                return
+
         for idx, file_path in enumerate(self.files):
             ext = Path(file_path).suffix.lower()
             if ext not in self.supported_filetypes:
@@ -203,7 +221,13 @@ class ApplyGainWorker(QObject):
                 self.progress.emit(int((idx + 1) / total * 100))
                 continue
 
-            tmp_file = str(Path(file_path).with_suffix(f".gain_tmp{ext}"))
+            # Determine output file path
+            out_file = file_path
+            if self.create_modified:
+                p = Path(file_path)
+                out_file = str(output_dir / p.name)
+
+            tmp_file = str(Path(out_file).with_suffix(f".gain_tmp{ext}"))
             ffmpeg_cmd = [
                 "ffmpeg", "-y", "-i", file_path,
                 "-map_metadata", "0", "-map", "0",
@@ -231,7 +255,6 @@ class ApplyGainWorker(QObject):
                 except Exception:
                     pass
             ffmpeg_cmd.append(tmp_file)
-
             try:
                 proc_ffmpeg = subprocess.run(ffmpeg_cmd, capture_output=True, text=True, check=False)
                 if proc_ffmpeg.returncode != 0:
@@ -240,7 +263,7 @@ class ApplyGainWorker(QObject):
                         os.remove(tmp_file)
                     self.progress.emit(int((idx + 1) / total * 100))
                     continue
-                os.replace(tmp_file, file_path)
+                os.replace(tmp_file, out_file)
             except Exception as e:
                 error_logs.append(f"{file_path} (ffmpeg): {str(e)}")
                 if os.path.exists(tmp_file):
@@ -253,12 +276,17 @@ class ApplyGainWorker(QObject):
             replaygain_val = "-"
             clipping_val = "-"
             ext = Path(file_path).suffix.lower()
+            # For modified output, analyze the output file, not the original
+            analyze_path = file_path
+            if self.create_modified:
+                p = Path(file_path)
+                analyze_path = str(output_dir / p.name)
             if ext not in self.supported_filetypes:
                 analysis_results.append((idx, loudness_val, replaygain_val, clipping_val))
                 continue
             try:
                 proc = subprocess.run(
-                    ["rsgain", "custom", "-s", "i", "-l", lufs_str, "-O", file_path],
+                    ["rsgain", "custom", "-s", "i", "-l", lufs_str, "-O", analyze_path],
                     capture_output=True, text=True, check=False
                 )
                 output = proc.stdout
@@ -284,8 +312,8 @@ class ApplyGainWorker(QObject):
                             else:
                                 clipping_val = clip_val
                 else:
-                    error_logs.append(f"{file_path} (analyze):\n{proc.stderr or proc.stdout}")
+                    error_logs.append(f"{analyze_path} (analyze):\n{proc.stderr or proc.stdout}")
             except Exception as e:
-                error_logs.append(f"{file_path} (analyze): {str(e)}")
+                error_logs.append(f"{analyze_path} (analyze): {str(e)}")
             analysis_results.append((idx, loudness_val, replaygain_val, clipping_val))
         self.finished.emit(error_logs, analysis_results)

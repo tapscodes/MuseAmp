@@ -1,19 +1,15 @@
 #!/usr/bin/env python3
-import base64
 import os
 from pathlib import Path
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QPushButton, QFileDialog, QProgressBar, QMessageBox,
     QTableWidget, QTableWidgetItem, QAbstractItemView, QHBoxLayout, QHeaderView,
-    QLineEdit, QLabel, QDialog, QTextEdit, QDialogButtonBox
+    QLineEdit, QLabel, QDialog, QTextEdit, QDialogButtonBox, QCheckBox,
+    QApplication
 )
 from PySide6.QtGui import QIntValidator, QIcon
 from PySide6.QtCore import Qt, QThread
 from .workers import Worker, AddFilesWorker, ApplyGainWorker
-
-MUSEAMP_SVG_BASE64 = """
-PHN2ZyB3aWR0aD0iMTBpbiIgaGVpZ2h0PSIxMGluIiB2aWV3Qm94PSIwIDAgNzIwIDcyMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayI+CiA8ZGVmcz4KICA8bGluZWFyR3JhZGllbnQgaWQ9ImEiIHgxPSIyODIuMTEiIHgyPSI1NzYuMTEiIHkxPSIxNjkuNTciIHkyPSIxNjkuNTciIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj4KICAgPHN0b3Agc3RvcC1jb2xvcj0iI2ZmMDBlMSIgb2Zmc2V0PSIwIi8+CiAgIDxzdG9wIHN0b3AtY29sb3I9IiNlNGU0ZmYiIG9mZnNldD0iLjM5ODUiLz4KICAgPHN0b3Agc3RvcC1jb2xvcj0iI2ZmYmZhYyIgb2Zmc2V0PSIuODg4MyIvPgogIDwvbGluZWFyR3JhZGllbnQ+CiAgPGxpbmVhckdyYWRpZW50IGlkPSJiIiB4MT0iMjAwLjk1IiB4Mj0iMjU5LjMzIiB5MT0iNTM3LjI3IiB5Mj0iNTM3LjI3IiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+CiAgIDxzdG9wIHN0b3AtY29sb3I9IiMxYjE0NjQiIG9mZnNldD0iMCIvPgogICA8c3RvcCBzdG9wLWNvbG9yPSIjMWIxNDhmIiBvZmZzZXQ9Ii41MTAyIi8+CiAgIDxzdG9wIHN0b3AtY29sb3I9IiMxYjE0N2IiIG9mZnNldD0iLjg4ODMiLz4KICA8L2xpbmVhckdyYWRpZW50PgogIDxsaW5lYXJHcmFkaWVudCBpZD0iYyIgeDE9IjIwNS4yOCIgeDI9IjMwNi44OSIgeTE9IjQxOS42NyIgeTI9IjQxOS42NyIgeGxpbms6aHJlZj0iI2IiLz4KICA8bGluZWFyR3JhZGllbnQgaWQ9ImQiIHgxPSIxNDEuNSIgeDI9IjI1OC4yNSIgeTE9IjUxMi40NSIgeTI9IjUxMi40NSIgeGxpbms6aHJlZj0iI2IiLz4KICA8bGluZWFyR3JhZGllbnQgaWQ9ImUiIHgxPSI0NjAuMzkiIHgyPSI1NjIiIHkxPSI0MjQuMjQiIHkyPSI0MjQuMjQiIHhsaW5rOmhyZWY9IiNiIi8+CiAgPGxpbmVhckdyYWRpZW50IGlkPSJmIiB4MT0iNDU5LjMyIiB4Mj0iNTE1LjAzIiB5MT0iNTQxLjciIHkyPSI1NDEuNyIgeGxpbms6aHJlZj0iI2IiLz4KICA8bGluZWFyR3JhZGllbnQgaWQ9ImciIHgxPSIzOTguNzciIHgyPSI1MTMuMzYiIHkxPSI1MjEuMDkiIHkyPSI1MjEuMDkiIHhsaW5rOmhyZWY9IiNiIi8+CiAgPGxpbmVhckdyYWRpZW50IGlkPSJoIiB4MT0iMjY1IiB4Mj0iNTc5IiB5MT0iMjUyLjUiIHkyPSIyNTIuNSIgeGxpbms6aHJlZj0iI2IiLz4KICA8bGluZWFyR3JhZGllbnQgaWQ9ImkiIHgxPSIyNzMuNyIgeDI9IjU3OSIgeTE9IjIzNS4xOCIgeTI9IjIzNS4xOCIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPgogICA8c3RvcCBzdG9wLWNvbG9yPSIjYWYyNzhmIiBvZmZzZXQ9IjAiLz4KICAgPHN0b3Agc3RvcC1jb2xvcj0iI2E2MDA1ZCIgb2Zmc2V0PSIuMjgxNyIvPgogICA8c3RvcCBzdG9wLWNvbG9yPSIjZDExNDVhIiBvZmZzZXQ9Ii44ODgzIi8+CiAgPC9saW5lYXJHcmFkaWVudD4KIDwvZGVmcz4KIDx0aXRsZT5tdXNpY3dhdmU8L3RpdGxlPgogPHBhdGggZD0ibTI4NCAyMjkuNWM1LTE0Ljc0NCAxNC0yNy44NSAyMS00Mi4wNDggNS04LjczNzMgMTAtMTYuMzgyIDE4LTIwLjc1MSA2LTIuMTg0NCA3IDUuNDYwOCA4IDkuODI5NXYzMC41ODFjLTEgNC4zNjg3IDEgMTAuOTIyIDYgMTIuMDE0IDIgMCAzLTIuMTg0MyA0LTMuMjc2NSA0LTkuODI5NSA1LTIwLjc1MSA4LTMwLjU4MSA2LTE3LjQ3NSAxMC0zNi4wNDIgMjEtNTEuMzMyIDQtNC4zNjg3IDkgMS4wOTIxIDEwIDQuMzY4NiAwIDIuMTg0NCAxIDQuMzY4NyAyIDcuNjQ1MiAzIDE2LjM4MiAzIDMyLjc2NSAzIDQ5LjE0OGExMS4zMDMgMTEuMzAzIDAgMCAwIDkgMTAuOTIyYzEgMCAyLTEuMDkyMSAzLTEuMDkyMSA0LTQuMzY4NyA2LTkuODI5NSA4LTE1LjI5IDQtMTcuNDc1IDYtMzMuODU3IDEzLTUwLjI0YTI0LjM4MyAyNC4zODMgMCAwIDAgMy01LjQ2MDhjMS0yLjE4NDMgNC00LjM2ODcgNi0zLjI3NjUgMiAwIDQgNC4zNjg2IDUgNi41NTMgNyAyNS4xMiA0IDUwLjI0IDggNzYuNDUyIDEgNy42NDUyIDEyIDguNzM3MyAxNyAzLjI3NjUgMTEtMTQuMTk4IDExLTMyLjc2NSAxMy01MC4yNCAyLTcuNjQ1MiA1LTE1LjI5IDEyLTE2LjM4MiA0LTEuMDkyMiA2IDQuMzY4NiA4IDcuNjQ1MSA2IDE2LjM4MiA1IDMzLjg1NyA4IDUyLjQyNCAxIDUuNDYwOCA3IDYuNTUzIDEyIDcuNjQ1MiA1IDAgMTAtNC4zNjg3IDEzLTguNzM3NCA2LTE0LjE5OCA3LTI5LjQ4OCAxMS00NC43NzkgNC0xNi4zODIgNS0zMy44NTcgMTMtNDkuMTQ3IDEtMi4xODQ0IDMtNC4zNjg3IDUtNC4zNjg3IDYgNC4zNjg3IDUgMTMuMTA2IDcgMjAuNzUxdjkuODI5NGMzIDI0LjAyOCAyIDQ2Ljk2MyA0IDcwLjk5MSAwIDYuNTUzIDggOC43Mzc0IDExLjQ1IDEzLjkiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzllMDA1ZCIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIiBzdHJva2Utd2lkdGg9IjgiLz4KIDxwYXRoIGQ9Im0yODQgMjI5LjVjNS0xNC43NDQgMTQtMjcuODUgMjEtNDIuMDQ4IDUtOC43MzczIDEwLTE2LjM4MiAxOC0yMC43NTEgNi0yLjE4NDQgNyA1LjQ2MDggOCA5LjgyOTV2MzAuNTgxYy0xIDQuMzY4NyAxIDEwLjkyMiA2IDEyLjAxNCAyIDAgMy0yLjE4NDMgNC0zLjI3NjUgNC05LjgyOTUgNS0yMC43NTEgOC0zMC41ODEgNi0xNy40NzUgMTAtMzYuMDQyIDIxLTUxLjMzMiA0LTQuMzY4NyA5IDEuMDkyMSAxMCA0LjM2ODYgMCAyLjE4NDQgMSA0LjM2ODcgMiA3LjY0NTIgMyAxNi4zODIgMyAzMi43NjUgMyA0OS4xNDhhMTEuMzAzIDExLjMwMyAwIDAgMCA5IDEwLjkyMmMxIDAgMi0xLjA5MjEgMy0xLjA5MjEgNC00LjM2ODcgNi05LjgyOTUgOC0xNS4yOSA0LTE3LjQ3NSA2LTMzLjg1NyAxMy01MC4yNGEyNC4zODMgMjQuMzgzIDAgMCAwIDMtNS40NjA4YzEtMi4xODQzIDQtNC4zNjg3IDYtMy4yNzY1IDIgMCA0IDQuMzY4NiA1IDYuNTUzIDcgMjUuMTIgNCA1MC4yNCA4IDc2LjQ1MiAxIDcuNjQ1MiAxMiA4LjczNzMgMTcgMy4yNzY1IDExLTE0LjE5OCAxMS0zMi43NjUgMTMtNTAuMjQgMi03LjY0NTIgNS0xNS4yOSAxMi0xNi4zODIgNC0xLjA5MjIgNiA0LjM2ODYgOCA3LjY0NTEgNiAxNi4zODIgNSAzMy44NTcgOCA1Mi40MjQgMSA1LjQ2MDggNyA2LjU1MyAxMiA3LjY0NTIgNSAwIDEwLTQuMzY4NyAxMy04LjczNzQgNi0xNC4xOTggNy0yOS40ODggMTEtNDQuNzc5IDQtMTYuMzgyIDUtMzMuODU3IDEzLTQ5LjE0NyAxLTIuMTg0NCAzLTQuMzY4NyA1LTQuMzY4NyA2IDQuMzY4NyA1IDEzLjEwNiA3IDIwLjc1MXY5LjgyOTRjMyAyNC4wMjggMiA0Ni45NjMgNCA3MC45OTEgMCA2LjU1MyA4IDguNzM3NCAxMS40NSAxMy45IiBmaWxsPSJub25lIiBzdHJva2U9InVybCgjYSkiIHN0cm9rZS1taXRlcmxpbWl0PSIxMCIgc3Ryb2tlLXdpZHRoPSI0Ii8+CiA8cGF0aCBkPSJtMjU5LjMzIDUxNC4zN3MtNC4zMjM5IDQ5LjcyNS01OC4zNzMgNDcuNTYzYzAgMmUtNCAzMC4yNjctNjAuNTM0IDU4LjM3My00Ny41NjN6IiBmaWxsPSJ1cmwoI2IpIiBzdHJva2U9IiMxYzAwNWUiIHN0cm9rZS1taXRlcmxpbWl0PSIxMCIvPgogPHBhdGggZD0ibTIwOS45OCA1NTUuNjdhNzkuNDQ4IDc5LjQ0OCAwIDAgMSAzMi44MTgtMjMuMjI0IDEzLjMxMSAxMy4zMTEgMCAwIDEgMy4zNTUyLTAuNzk5MmMxLjk5NjItMi45ODcyIDQuMTQtNS45MTU4IDYuMzg1My04Ljc5MWExMC45MzcgMTAuOTM3IDAgMCAxIDYuMDI5LTMuODgyOGMwLjAzMjUtMC4wMzI0IDAuMDY4LTAuMDU4OSAwLjEwMDctMC4wOTA4bDQ4LjIyMy0yMzcuODNoLTQyLjE5M2wtNTkuNDIgMjc3LjIyaDMuMjg2OWE2Ljk2NDUgNi45NjQ1IDAgMCAxIDEuNDE1MS0yLjYxMDh6IiBmaWxsPSJ1cmwoI2cpIiBzdHJva2U9IiMxYzAwNWUiIHN0cm9rZS1taXRlcmxpbWl0PSIxMCIvPgogPGVsbGlwc2UgY3g9IjE5OS44NyIgY3k9IjUxMi40NSIgcng9IjU4LjM3MyIgcnk9IjUzLjQwNSIgZmlsbD0idXJsKCNkKSIgc3Ryb2tlPSIjMWMwMDVlIiBzdHJva2UtbWl0ZXJsaWl0PSIxMCIvPgogPHBvbHlnb24gcG9pbnRzPSI1NjIgMjgyIDU3OSAyMjMgMjgwIDIyMyAyNjUgMjgxIiBmaWxsPSJ1cmwoI2gpIiBzdHJva2U9IiMxYzAwNWUiIHN0cm9rZS1taXRlcmxpbWl0PSIxMCIgc3Ryb2tlLXdpZHRoPSI0LjMiLz4KIDxwb2x5Z29uIHBvaW50cz0iMjczLjcgMjQ3LjM1IDU3MS45OCAyNDcuMzUgNTc5IDIyMyAyODAgMjIzIiBmaWxsPSJ1cmwoI2kpIi8+Cjwvc3ZnPgo=
-"""
 
 supported_filetypes = {".flac", ".mp3"}
 
@@ -45,17 +41,6 @@ class AudioToolGUI(QWidget):
         #set basic window properties
         self.setWindowTitle("MuseAmp")
         self.setMinimumSize(700, 500)
-        # Decode base64 SVG and set as icon
-        svg_bytes = base64.b64decode(MUSEAMP_SVG_BASE64)
-        from PySide6.QtSvgWidgets import QSvgWidget
-        from PySide6.QtGui import QPixmap
-        from PySide6.QtCore import QByteArray
-        svg_widget = QSvgWidget()
-        svg_widget.load(QByteArray(svg_bytes))
-        pixmap = QPixmap(svg_widget.size())
-        svg_widget.render(pixmap)
-        icon = QIcon(pixmap)
-        self.setWindowIcon(icon)
         self.layout = QVBoxLayout(self)  #main vertical layout
 
         #file info table setup
@@ -74,19 +59,36 @@ class AudioToolGUI(QWidget):
         self.gain_btn = QPushButton("Apply Gain")
         self.replaygain_btn = QPushButton("Analyze && Tag")
 
+        #label for replaygain input
+        self.replaygain_label = QLabel("Target LUFS: -")
         #textbox for replaygain value input
         self.replaygain_input = QLineEdit()
         self.replaygain_input.setFixedWidth(50) #fix width for neatness
         self.replaygain_input.setText("18") #default ReplayGain 2.0 LUFS value (positive version)
         self.replaygain_input.setValidator(QIntValidator(5, 30, self))  #allow only 5 to 30
 
-        #label for replaygain input
-        self.replaygain_label = QLabel("Target LUFS: -")
+        # Add checkbox for "Create modified copy"
+        self.create_modified_checkbox = QCheckBox("Create modified copy in folder instead of modifying file directly")
+        self.create_modified_checkbox.setChecked(False)
 
-        #layout for replaygain label + input
+        # layout for LUFS label + input
         self.replaygain_layout = QHBoxLayout()
         self.replaygain_layout.addWidget(self.replaygain_label)
         self.replaygain_layout.addWidget(self.replaygain_input)
+
+        # horizontal layout for buttons
+        self.button_layout = QHBoxLayout()
+        for btn in [
+            self.add_files_btn, self.add_folder_btn,
+            self.remove_files_btn, self.gain_btn, self.replaygain_btn
+        ]:
+            self.button_layout.addWidget(btn)
+
+        # new layout for LUFS + checkbox (second row)
+        self.options_layout = QHBoxLayout()
+        self.options_layout.addLayout(self.replaygain_layout)
+        self.options_layout.addWidget(self.create_modified_checkbox)
+        self.options_layout.addStretch(1)
 
         #progress bar defaulting to 100
         self.progress_bar = QProgressBar()
@@ -95,20 +97,10 @@ class AudioToolGUI(QWidget):
         self.progress_bar.setValue(100)         #default to 100%
         self.progress_bar.setFormat("100%")
 
-        #horizontal layout for buttons and input
-        self.button_layout = QHBoxLayout()
-        for btn in [
-            self.add_files_btn, self.add_folder_btn,
-            self.remove_files_btn, self.gain_btn, self.replaygain_btn
-        ]:
-            self.button_layout.addWidget(btn)
-
-        #add replaygain input layout to the right of replaygain button
-        self.button_layout.addLayout(self.replaygain_layout)
-
         #add widgets to the main layout
         self.layout.addWidget(self.table)
         self.layout.addLayout(self.button_layout)
+        self.layout.addLayout(self.options_layout)
         self.layout.addWidget(self.progress_bar)
         
         #connect buttons to functions
@@ -280,19 +272,19 @@ class AudioToolGUI(QWidget):
             QMessageBox.information(self, "No Files", "No files to analyze.")
             return
 
-        #show the overwrite ReplayGain tags warning
-        reply = QMessageBox.question(
-            self,
-            "ReplayGain Tagging",
-            "Some files may already have ReplayGain tags. Overwrite existing tags?",
-            QMessageBox.Yes | QMessageBox.No,
-            QMessageBox.Yes
-        )
-        if reply != QMessageBox.Yes:
-            #do not perform the operation if user selects 'No'
-            self.set_ui_enabled(True)
-            self.set_progress(100)
-            return
+        # Only show warning if not creating modified copy
+        if not self.create_modified_checkbox.isChecked():
+            reply = QMessageBox.question(
+                self,
+                "ReplayGain Tagging",
+                "Some files may already have ReplayGain tags. Overwrite existing tags?",
+                QMessageBox.Yes | QMessageBox.No,
+                QMessageBox.Yes
+            )
+            if reply != QMessageBox.Yes:
+                self.set_ui_enabled(True)
+                self.set_progress(100)
+                return
 
         #get user input for LUFS from textbox
         try:
@@ -308,7 +300,10 @@ class AudioToolGUI(QWidget):
             self.table.setItem(row, 4, QTableWidgetItem("-"))
 
         self.worker_thread = QThread()
-        self.worker = Worker(files, lufs)
+        self.worker = Worker(
+            files, lufs,
+            create_modified=self.create_modified_checkbox.isChecked()
+        )
         self.worker.overwrite_rg = True
         self.worker.moveToThread(self.worker_thread)
         self.worker_thread.started.connect(self.worker.run)
@@ -337,21 +332,21 @@ class AudioToolGUI(QWidget):
             
 
     def apply_gain_adjust(self):
-        #gather all file paths from the table
         files = [self.table.item(row, 0).text() for row in range(self.table.rowCount())]
         if not files:
             return
 
-        #always warn the user before applying gain
-        reply = QMessageBox.question(
-            self,
-            "Warning: Apply Gain",
-            "Applying gain to your files can irreparably damage them regardless of format. Do you want to continue?",
-            QMessageBox.Yes | QMessageBox.No,
-            QMessageBox.No
-        )
-        if reply != QMessageBox.Yes:
-            return
+        # Only show warning if not creating modified copy
+        if not self.create_modified_checkbox.isChecked():
+            reply = QMessageBox.question(
+                self,
+                "Warning: Apply Gain",
+                "Applying gain to your files can irreparably damage them regardless of format. Do you want to continue?",
+                QMessageBox.Yes | QMessageBox.No,
+                QMessageBox.No
+            )
+            if reply != QMessageBox.Yes:
+                return
 
         #get LUFS value from user input
         try:
@@ -360,16 +355,17 @@ class AudioToolGUI(QWidget):
             QMessageBox.warning(self, "Invalid LUFS", "Please enter a valid LUFS value.")
             return
 
-        #disable UI and reset progress bar and table columns for operation
         self.set_ui_enabled(False)
         self.set_progress(0)
         for row in range(self.table.rowCount()):
             self.table.setItem(row, 3, QTableWidgetItem("-"))
             self.table.setItem(row, 4, QTableWidgetItem("-"))
 
-        #start ApplyGainWorker in a background thread to keep UI responsive
         self.gain_worker_thread = QThread()
-        self.gain_worker = ApplyGainWorker(files, lufs, self.table, supported_filetypes)
+        self.gain_worker = ApplyGainWorker(
+            files, lufs, self.table, supported_filetypes,
+            create_modified=self.create_modified_checkbox.isChecked()
+        )
         self.gain_worker.moveToThread(self.gain_worker_thread)
         self.gain_worker.progress.connect(self.set_progress)
         self.gain_worker.finished.connect(self._on_apply_gain_finished)
