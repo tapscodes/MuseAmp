@@ -103,13 +103,18 @@ jobs:
         with:
           name: museamp-${{ runner.os }}
           path: |
-            dist/*
+            dist/MuseAmpLinux*
+            dist/MuseAmpMacOS*
+            dist/MuseAmpWindows.exe
 
       # --- Upload to GitHub Releases (all platforms) ---
       - name: Upload to GitHub Releases
         if: github.event_name == 'release'
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/*
+          files: |
+            dist/MuseAmpLinux*
+            dist/MuseAmpMacOS*
+            dist/MuseAmpWindows.exe
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
