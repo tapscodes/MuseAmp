@@ -88,7 +88,13 @@ jobs:
       # --- Build with PyInstaller ---
       - name: Build with PyInstaller
         run: |
-          pyinstaller --onefile --add-binary "rsgain:." --add-binary "ffmpeg:." MuseAmp.pyw
+          if [ "${{ runner.os }}" = "Linux" ]; then
+            pyinstaller --onefile --name MuseAmpLinux --add-binary "rsgain:." --add-binary "ffmpeg:." MuseAmp.pyw
+          elif [ "${{ runner.os }}" = "macOS" ]; then
+            pyinstaller --onefile --name MuseAmpMacOS --add-binary "rsgain:." --add-binary "ffmpeg:." MuseAmp.pyw
+          elif [ "${{ runner.os }}" = "Windows" ]; then
+            pyinstaller --onefile --name MuseAmpWindows --add-binary "rsgain;." --add-binary "ffmpeg;." MuseAmp.pyw
+          fi
 
       # --- Upload artifact (Actions tab) ---
       - name: Upload artifact (Actions tab)
