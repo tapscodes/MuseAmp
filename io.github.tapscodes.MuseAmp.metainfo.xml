@@ -22,9 +22,9 @@
   <url type="contribute">https://github.com/tapscodes/MuseAmp</url>
 
   <releases>
-    <release version="1.0.0" date="2025-06-12">
+    <release version="1.2.0" date="2025-06-13">
       <description>
-        <p>Initial Flatpak release.</p>
+        <p>Added toggle to search subfolders.</p>
       </description>
     </release>
     <release version="1.1.0" date="2025-06-13">
@@ -32,9 +32,9 @@
         <p>Added toggle to not modify file directly.</p>
       </description>
     </release>
-    <release version="1.2.0" date="2025-06-13">
+    <release version="1.0.0" date="2025-06-12">
       <description>
-        <p>Added toggle to search subfolders.</p>
+        <p>Initial Flatpak release.</p>
       </description>
     </release>
   </releases>
