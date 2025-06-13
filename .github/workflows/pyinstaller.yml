@@ -37,6 +37,14 @@ jobs:
           wget https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2025-06-13-13-43/ffmpeg-n7.1.1-22-g0f1fe3d153-linux64-gpl-7.1.tar.xz
           tar xf ffmpeg-n7.1.1-22-g0f1fe3d153-linux64-gpl-7.1.tar.xz
           cp ffmpeg-n7.1.1-22-g0f1fe3d153-linux64-gpl-7.1/bin/ffmpeg ./ffmpeg
+          if [ ! -f rsgain ]; then
+            echo "Error: rsgain not found!"
+            exit 1
+          fi
+          if [ ! -f ffmpeg ]; then
+            echo "Error: ffmpeg not found!"
+            exit 1
+          fi
 
       # --- Windows: Download RSgain and FFmpeg ---
       - name: Download RSgain and FFmpeg (Windows)
@@ -51,7 +59,7 @@ jobs:
             )
           )
           if not exist rsgain.exe (
-            echo "Error: rsgain.exe not found!"
+            echo Error: rsgain.exe not found!
             exit 1
           )
           curl -LO https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2025-06-13-13-43/ffmpeg-n7.1.1-22-g0f1fe3d153-winarm64-gpl-7.1.zip
@@ -60,6 +68,10 @@ jobs:
             if exist "%%i" (
               copy "%%i" ffmpeg.exe
             )
+          )
+          if not exist ffmpeg.exe (
+            echo Error: ffmpeg.exe not found!
+            exit 1
           )
 
       - name: Rename rsgain.exe to rsgain (Windows)
@@ -84,6 +96,14 @@ jobs:
           fi
           curl --fail -Lo ffmpeg.zip https://evermeet.cx/ffmpeg/getrelease/zip
           unzip ffmpeg.zip
+          if [ ! -f rsgain ]; then
+            echo "Error: rsgain not found!"
+            exit 1
+          fi
+          if [ ! -f ffmpeg ]; then
+            echo "Error: ffmpeg not found!"
+            exit 1
+          fi
 
       # --- Build with PyInstaller ---
       - name: Build with PyInstaller
