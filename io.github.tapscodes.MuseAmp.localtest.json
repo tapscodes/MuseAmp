@@ -8,16 +8,68 @@
   "command": "MuseAmp.pyw",
   "add-extensions": {
     "org.freedesktop.Platform.ffmpeg-full": {
-      "version": "24.08"
+      "version": "24.08",
+      "directory": "lib/ffmpeg",
+      "add-ld-path": "."
     }
   },
+  "cleanup": [
+    "/include",
+    "/lib/pkgconfig",
+    "/lib/cmake",
+    "/share/aclocal",
+    "/share/doc",
+    "/share/gtk-doc",
+    "/share/man",
+    "/share/info"
+  ],
+  "cleanup-commands": [
+    "mkdir -p /app/lib/ffmpeg"
+  ],
   "finish-args": [
     "--share=ipc",
+    "--device=dri",
     "--socket=wayland",
     "--socket=fallback-x11"
   ],
   "modules": [
+    {
+      "name": "libebur128",
+      "buildsystem": "cmake-ninja",
+      "builddir": true,
+      "sources": [
+        {
+          "type": "archive",
+          "url": "https://github.com/jiixyj/libebur128/archive/refs/tags/v1.2.6.tar.gz",
+          "sha256": "baa7fc293a3d4651e244d8022ad03ab797ca3c2ad8442c43199afe8059faa613"
+        }
+      ]
+    },
+    {
+      "name": "inih",
+      "buildsystem": "meson",
+      "builddir": true,
+      "sources": [
+        {
+          "type": "archive",
+          "url": "https://github.com/benhoyt/inih/archive/refs/tags/r57.tar.gz",
+          "sha256": "f03f98ca35c3adb56b2358573c8d3eda319ccd5287243d691e724b7eafa970b3"
+        }
+      ]
+    },
     "python3-mutagen.json",
+    {
+      "name": "rsgain",
+      "buildsystem": "cmake-ninja",
+      "builddir": true,
+      "sources": [
+        {
+          "type": "git",
+          "url": "https://github.com/complexlogic/rsgain.git",
+          "tag": "v3.6"
+        }
+      ]
+    },
     {
       "name": "museamp",
       "buildsystem": "simple",
@@ -26,7 +78,7 @@
         "cp -r museamp /app/bin/",
         "install -Dm644 io.github.tapscodes.MuseAmp.svg /app/share/icons/hicolor/scalable/apps/io.github.tapscodes.MuseAmp.svg",
         "install -Dm644 io.github.tapscodes.MuseAmp.desktop /app/share/applications/io.github.tapscodes.MuseAmp.desktop",
-        "install -Dm644 io.github.tapscodes.MuseAmp.appdata.xml /app/share/metainfo/io.github.tapscodes.MuseAmp.appdata.xml"
+        "install -Dm644 io.github.tapscodes.MuseAmp.metainfo.xml /app/share/metainfo/io.github.tapscodes.MuseAmp.appdata.xml"
       ],
       "sources": [
         {
@@ -48,19 +100,7 @@
         },
         {
           "type": "file",
-          "path": "io.github.tapscodes.MuseAmp.appdata.xml"
-        }
-      ]
-    },
-    {
-      "name": "rsgain",
-      "buildsystem": "cmake-ninja",
-      "builddir": true,
-      "sources": [
-        {
-          "type": "git",
-          "url": "https://github.com/complexlogic/rsgain.git",
-          "tag": "v3.6"
+          "path": "io.github.tapscodes.MuseAmp.metainfo.xml"
         }
       ]
     }
