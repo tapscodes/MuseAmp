@@ -53,16 +53,20 @@ jobs:
         run: |
           curl -LO https://github.com/complexlogic/rsgain/releases/download/v3.6/rsgain-3.6-win64.zip
           powershell -Command "Expand-Archive -Path rsgain-3.6-win64.zip -DestinationPath rsgain-win64"
-          if exist rsgain-win64\rsgain.exe (
-            copy rsgain-win64\rsgain.exe rsgain.exe
+          dir rsgain-win64 /s
+          for /r rsgain-win64 %%f in (rsgain.exe) do copy "%%f" rsgain.exe
+          if exist rsgain.exe (
+            echo rsgain.exe found and copied to working directory.
           ) else (
             echo Error: rsgain.exe not found!
             exit 1
           )
           curl -LO https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2025-06-13-13-43/ffmpeg-n7.1.1-22-g0f1fe3d153-winarm64-gpl-7.1.zip
           powershell -Command "Expand-Archive -Path ffmpeg-n7.1.1-22-g0f1fe3d153-winarm64-gpl-7.1.zip -DestinationPath ffmpeg"
-          if exist ffmpeg\ffmpeg.exe (
-            copy ffmpeg\ffmpeg.exe ffmpeg.exe
+          dir ffmpeg /s
+          for /r ffmpeg %%f in (ffmpeg.exe) do copy "%%f" ffmpeg.exe
+          if exist ffmpeg.exe (
+            echo ffmpeg.exe found and copied to working directory.
           ) else (
             echo Error: ffmpeg.exe not found!
             exit 1
