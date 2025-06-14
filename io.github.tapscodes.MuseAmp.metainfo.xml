@@ -26,6 +26,11 @@
   <url type="contribute">https://github.com/tapscodes/MuseAmp</url>
 
   <releases>
+  <release version="1.2.1" date="2025-06-14">
+      <description>
+        <p>Shortened app summary and added 'branding' color.</p>
+      </description>
+    </release>
     <release version="1.2.0" date="2025-06-13">
       <description>
         <p>Added toggle to search subfolders.</p>
