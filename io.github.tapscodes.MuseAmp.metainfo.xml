@@ -2,11 +2,15 @@
 <component type="desktop-application">
   <id>io.github.tapscodes.MuseAmp</id>
   <name>MuseAmp</name>
-  <summary>An audio level normalizer/amplifier for MP3 and FLAC files</summary>
+  <summary>Audio normalizer for MP3/FLAC</summary>
   
   <developer id="io.github">
     <name>tapscodes</name>
   </developer>
+
+  <branding>
+    <color type="primary">#d1145a</color>
+  </branding>
 
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>BSD-3-Clause</project_license>
