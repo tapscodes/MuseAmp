@@ -9,7 +9,8 @@
   </developer>
 
   <branding>
-    <color type="primary">#f2eb8d</color>
+    <color type="primary" scheme_preference="light">#dc8add</color>
+    <color type="primary" scheme_preference="dark">#813d9c</color>
   </branding>
 
   <metadata_license>CC0-1.0</metadata_license>
@@ -26,6 +27,11 @@
   <url type="contribute">https://github.com/tapscodes/MuseAmp</url>
 
   <releases>
+    <release version="1.2.3" date="2025-06-17">
+      <description>
+        <p>Got higher quality screenshots, much higher quality app logo, and dark mode for flathub store.</p>
+      </description>
+    </release>
     <release version="1.2.2" date="2025-06-16">
       <description>
         <p>Fixed 'branding' color and screenshots.</p>
@@ -81,15 +87,15 @@
   <screenshots>
     <screenshot type="default">
       <caption>Main Window</caption>
-      <image>https://github.com/tapscodes/MuseAmp/blob/main/screenshot1.jpg?raw=true</image>
+      <image>https://github.com/tapscodes/MuseAmp/blob/main/screenshot1.png?raw=true</image>
     </screenshot>
     <screenshot>
       <caption>Window In Progress</caption>
-      <image>https://github.com/tapscodes/MuseAmp/blob/main/screenshot2.jpg?raw=true</image>
+      <image>https://github.com/tapscodes/MuseAmp/blob/main/screenshot2.png?raw=true</image>
     </screenshot>
     <screenshot>
-      <caption>Window Of Completion</caption>
-      <image>https://github.com/tapscodes/MuseAmp/blob/main/screenshot3.jpg?raw=true</image>
+      <caption>Completion Window</caption>
+      <image>https://github.com/tapscodes/MuseAmp/blob/main/screenshot3.png?raw=true</image>
     </screenshot>
   </screenshots>
   
