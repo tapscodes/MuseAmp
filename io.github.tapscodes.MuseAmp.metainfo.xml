@@ -29,6 +29,11 @@
   <releases>
     <release version="1.2.5" date="2025-06-17">
       <description>
+        <p>Made summary more understandable.</p>
+      </description>
+    </release>
+    <release version="1.2.5" date="2025-06-17">
+      <description>
         <p>Made icon taller.</p>
       </description>
     </release>
@@ -81,14 +86,13 @@
   
   <description>
     <p>
-      MuseAmp (Music + Amplifier) is an audio level normalizer/amplifier similar to the windows software "MP3Gain" that makes your audio files play at the same normalized level.
-      It can either directly alter your audio files to amplify their native volume or simply apply a ReplayGain 2.0 standard tag to your files so your audio player of choice knows what audio level to play the audio at.
+      MuseAmp (Music + Amplifier) is an audio level normalizer/amplifier similar to the windows software "MP3Gain" that makes your audio files play at the same normalized audio level.
+      It can either directly change your audio files to make them louder or simply apply a ReplayGain 2.0 standard tag to your files so your audio player of choice knows what audio level to play the file at.
     </p>
     <ul>
       <li>Supports .mp3 and .flac files</li>
       <li>ReplayGain 2.0 tagging and direct gain adjustment</li>
-      <li>Batch processing and folder support</li>
-      <li>Modern PySide6 (Qt) interface</li>
+      <li>Multiple file processing and folder support</li>
     </ul>
   </description>
   
