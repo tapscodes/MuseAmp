@@ -303,9 +303,18 @@ class ApplyGainWorker(QObject):
                     pass
             ffmpeg_cmd.append(tmp_file)
             try:
-                proc_ffmpeg = subprocess.run(ffmpeg_cmd, capture_output=True, text=True, check=False)
+                #uses text=False to avoid decode errors, decode manually
+                proc_ffmpeg = subprocess.run(ffmpeg_cmd, capture_output=True, text=False, check=False)
+                #decode output safely for error reporting with latin1 fallback
+                def safe_decode(b):
+                    try:
+                        return b.decode('utf-8', errors='replace')
+                    except Exception:
+                        return b.decode('latin1', errors='replace')
                 if proc_ffmpeg.returncode != 0:
-                    error_logs.append(f"{file_path} (ffmpeg):\n{proc_ffmpeg.stderr or proc_ffmpeg.stdout}")
+                    stderr = safe_decode(proc_ffmpeg.stderr) if proc_ffmpeg.stderr else ""
+                    stdout = safe_decode(proc_ffmpeg.stdout) if proc_ffmpeg.stdout else ""
+                    error_logs.append(f"{file_path} (ffmpeg):\n{stderr or stdout}")
                     if os.path.exists(tmp_file):
                         os.remove(tmp_file)
                     self.progress.emit(int((idx + 1) / total * 100))
