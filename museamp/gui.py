@@ -13,7 +13,7 @@ from .workers import Worker, AddFilesWorker, ApplyGainWorker
 from .utils import find_supported_files
 
 #supported filetypes for museamp
-supported_filetypes = {".flac", ".mp3"}
+supported_filetypes = {".flac", ".mp3", ".m4a"}
 
 class ErrorLogDialog(QDialog):
     def __init__(self, log_text, parent=None):

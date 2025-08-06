@@ -4,7 +4,7 @@ from PySide6.QtCore import QObject, Signal
 import os 
 
 #supported file types for processing
-supported_filetypes = {".flac", ".mp3"}
+supported_filetypes = {".flac", ".mp3", ".m4a"}
 
 class Worker(QObject):
     #background worker for analyzing/tagging files with replaygain
@@ -301,6 +301,9 @@ class ApplyGainWorker(QObject):
                             ffmpeg_cmd += ["-sample_fmt", "s32"]
                 except Exception:
                     pass
+            elif ext == ".m4a":
+                # Default to AAC, but you could check for ALAC if needed
+                ffmpeg_cmd += ["-c:a", "aac"]
             ffmpeg_cmd.append(tmp_file)
             try:
                 #uses text=False to avoid decode errors, decode manually

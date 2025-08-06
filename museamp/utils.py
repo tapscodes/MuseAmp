@@ -4,7 +4,7 @@ from pathlib import Path
 
 def get_supported_filetypes():
     #return supported audio file extensions
-    return {".flac", ".mp3"}
+    return {".flac", ".mp3", ".m4a"}
 
 def is_supported_filetype(filepath):
     #check if the file has a supported extension
@@ -47,3 +47,44 @@ def find_supported_files(folder, supported_filetypes, recursive=True, already_li
             if path.is_file() and path.suffix.lower() in supported_filetypes and str(path) not in already_listed:
                 files.append(str(path))
     return files
+
+def extract_cover_art(filepath, resize_cover=True):
+    """
+    Extract cover art from an audio file (FLAC, MP3, M4A).
+    Returns a mutagen.flac.Picture object if found, else None.
+    """
+    import base64
+    from pathlib import Path
+    ext = Path(filepath).suffix.lower()
+    try:
+        if ext == ".flac":
+            from mutagen.flac import FLAC
+            audio = FLAC(filepath)
+            if audio.pictures:
+                return audio.pictures[0]
+        elif ext == ".mp3":
+            from mutagen.id3 import ID3, APIC
+            audio = ID3(filepath)
+            for tag in audio.values():
+                if isinstance(tag, APIC):
+                    from mutagen.flac import Picture
+                    pic = Picture()
+                    pic.data = tag.data
+                    pic.type = 3  # front cover
+                    pic.mime = tag.mime
+                    pic.desc = tag.desc
+                    return pic
+        elif ext == ".m4a":
+            from mutagen.mp4 import MP4, MP4Cover
+            audio = MP4(filepath)
+            covr = audio.tags.get('covr')
+            if covr:
+                from mutagen.flac import Picture
+                pic = Picture()
+                pic.data = covr[0]
+                pic.type = 3
+                pic.mime = "image/jpeg" if covr[0].startswith(b'\xff\xd8') else "image/png"
+                return pic
+    except Exception:
+        pass
+    return None
