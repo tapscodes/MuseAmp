@@ -135,10 +135,11 @@ jobs:
           python -m pip install --upgrade pip
           pip install PySide6 mutagen pyinstaller
 
-      - name: Setup FFmpeg
-        uses: FedericoCarboni/setup-ffmpeg@v3
-        with:
-          ffmpeg-version: release
+      - name: Download ffmpeg
+        run: |
+          curl -L -o ffmpeg.zip https://evermeet.cx/ffmpeg/getrelease/zip
+          unzip -o ffmpeg.zip
+        shell: bash
 
       - name: Download rsgain
         run: |
@@ -153,8 +154,7 @@ jobs:
       - name: Copy binaries to app folder
         run: |
           mkdir -p museamp_binaries
-          # FFmpeg is already in PATH from setup-ffmpeg action
-          cp $(which ffmpeg) museamp_binaries/ffmpeg
+          cp $(find . -type f -name ffmpeg | head -n1) museamp_binaries/ffmpeg
           cp $(find . -type f -name rsgain | head -n1) museamp_binaries/rsgain
         shell: bash
 
