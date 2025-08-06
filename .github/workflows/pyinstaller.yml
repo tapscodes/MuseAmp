@@ -28,11 +28,10 @@ jobs:
           python -m pip install --upgrade pip
           pip install PySide6 mutagen pyinstaller
 
-      - name: Download ffmpeg
-        run: |
-          curl -L -o ffmpeg.zip https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2025-06-13-13-43/ffmpeg-n7.1.1-22-g0f1fe3d153-winarm64-gpl-7.1.zip
-          tar -xf ffmpeg.zip || powershell -c "Expand-Archive ffmpeg.zip ."
-        shell: bash
+      - name: Setup FFmpeg
+        uses: FedericoCarboni/setup-ffmpeg@v3
+        with:
+          ffmpeg-version: release
 
       - name: Download rsgain
         run: |
@@ -43,8 +42,8 @@ jobs:
       - name: Copy binaries to app folder
         run: |
           mkdir -p museamp_binaries
-          # Find ffmpeg.exe and rsgain.exe and copy to museamp_binaries
-          cp $(find . -iname ffmpeg.exe | head -n1) museamp_binaries/ffmpeg.exe
+          # FFmpeg is already in PATH from setup-ffmpeg action
+          cp $(which ffmpeg) museamp_binaries/ffmpeg.exe
           cp $(find . -iname rsgain.exe | head -n1) museamp_binaries/rsgain.exe
         shell: bash
 
@@ -81,11 +80,10 @@ jobs:
           python -m pip install --upgrade pip
           pip install PySide6 mutagen pyinstaller
 
-      - name: Download ffmpeg
-        run: |
-          curl -L -o ffmpeg.tar.xz https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2025-06-13-13-43/ffmpeg-n7.1.1-22-g0f1fe3d153-linux64-gpl-7.1.tar.xz
-          tar -xf ffmpeg.tar.xz
-        shell: bash
+      - name: Setup FFmpeg
+        uses: FedericoCarboni/setup-ffmpeg@v3
+        with:
+          ffmpeg-version: release
 
       - name: Download rsgain
         run: |
@@ -96,7 +94,8 @@ jobs:
       - name: Copy binaries to app folder
         run: |
           mkdir -p museamp_binaries
-          cp $(find . -type f -executable -name ffmpeg | head -n1) museamp_binaries/ffmpeg
+          # FFmpeg is already in PATH from setup-ffmpeg action
+          cp $(which ffmpeg) museamp_binaries/ffmpeg
           cp $(find . -type f -executable -name rsgain | head -n1) museamp_binaries/rsgain
         shell: bash
 
@@ -136,11 +135,10 @@ jobs:
           python -m pip install --upgrade pip
           pip install PySide6 mutagen pyinstaller
 
-      - name: Download ffmpeg
-        run: |
-          curl -L -o ffmpeg.zip https://evermeet.cx/ffmpeg/getrelease/zip
-          unzip -o ffmpeg.zip
-        shell: bash
+      - name: Setup FFmpeg
+        uses: FedericoCarboni/setup-ffmpeg@v3
+        with:
+          ffmpeg-version: release
 
       - name: Download rsgain
         run: |
@@ -155,7 +153,8 @@ jobs:
       - name: Copy binaries to app folder
         run: |
           mkdir -p museamp_binaries
-          cp $(find . -type f -name ffmpeg | head -n1) museamp_binaries/ffmpeg
+          # FFmpeg is already in PATH from setup-ffmpeg action
+          cp $(which ffmpeg) museamp_binaries/ffmpeg
           cp $(find . -type f -name rsgain | head -n1) museamp_binaries/rsgain
         shell: bash
 
