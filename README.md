@@ -3,7 +3,7 @@ Museamp (Music + Amplifier) is an audio level normalizer/amplifier that makes yo
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=DEFAULT_FORMAT="{title}-{album}-{albumartist}-{year}"/DEFAULT_FORMAT="{title}-{album}-{albumartist}-{year}",tapscodes/MuseAmp&type=date&legend=top-left)](https://www.star-history.com/#DEFAULT_FORMAT=%22{title}-{album}-{albumartist}-{year}%22/DEFAULT_FORMAT=%22{title}-{album}-{albumartist}-{year}%22&tapscodes/MuseAmp&type=date&legend=top-left)
+[![Star History Chart](https://api.star-history.com/svg?repos=tapscodes/MuseAmp&type=date&legend=top-left)](https://www.star-history.com/#tapscodes/MuseAmp&type=date&legend=top-left)
 
 ## How to Use
 1. Install the binaries from the release tab and load up the program that way (should get you the necessary dependencies automatically). For linux users this app will also be available on [Flathub](https://flathub.org/) and it's reccomended to download it from there.
