@@ -1,6 +1,9 @@
 # Museamp 
-<p align="center"><a href="https://flatstat.mijorus.it/app/io.github.tapscodes.MuseAmp"  align="center"><img width="150" src="https://img.shields.io/endpoint?url=https://flathub-stats-backend.vercel.app/badges/io.github.tapscodes.MuseAmp/shields.io.json"></a></p>
 Museamp (Music + Amplifier) is an audio level normalizer/amplifier that makes your audio files play at the same normalized level. It can either directly alter your audio files (not advised as this can cause clipping to ruin audio quality) or simply apply a ReplayGain tag to your files so your audio player knows what level to play the audio at. It currently only supports MP3 and FLAC files as those are the most commonly used filetypes.
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=DEFAULT_FORMAT="{title}-{album}-{albumartist}-{year}"/DEFAULT_FORMAT="{title}-{album}-{albumartist}-{year}",tapscodes/MuseAmp&type=date&legend=top-left)](https://www.star-history.com/#DEFAULT_FORMAT=%22{title}-{album}-{albumartist}-{year}%22/DEFAULT_FORMAT=%22{title}-{album}-{albumartist}-{year}%22&tapscodes/MuseAmp&type=date&legend=top-left)
 
 ## How to Use
 1. Install the binaries from the release tab and load up the program that way (should get you the necessary dependencies automatically). For linux users this app will also be available on [Flathub](https://flathub.org/) and it's reccomended to download it from there.
