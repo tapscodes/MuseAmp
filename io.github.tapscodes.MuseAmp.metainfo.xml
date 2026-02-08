@@ -27,6 +27,11 @@
   <url type="contribute">https://github.com/tapscodes/MuseAmp</url>
 
   <releases>
+    <release version="1.3.1" date="2026-02-07">
+      <description>
+        <p>Added limiter option.</p>
+      </description>
+    </release>
     <release version="1.3.0" date="2025-08-06">
       <description>
         <p>Added AAC(m4a) support.</p>
