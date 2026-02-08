@@ -11,10 +11,11 @@ class Worker(QObject):
     finished = Signal(list, list)   #updates, error_logs
     progress = Signal(int)  #percent complete
 
-    def __init__(self, files, lufs=None, create_modified=False):
+    def __init__(self, files, lufs=None, limiter=0.0, create_modified=False):
         super().__init__()
         self.files = files
         self.lufs = lufs
+        self.limiter = limiter
         self.create_modified = create_modified
         self.output_dir = None  #set by gui if needed
 
@@ -77,11 +78,12 @@ class Worker(QObject):
                         emit_progress()
                         continue
             lufs_str = f"-{abs(int(self.lufs))}" if self.lufs is not None else "-18"
+            limiter_str = f"-{abs(float(self.limiter))}"
             loudness_val = "-"
             replaygain_val = "-"
             clipping_val = "-"
             rsgain_cmd = [
-                "rsgain", "custom", "-s", "i", "-l", lufs_str, "-O", out_file
+                "rsgain", "custom", "-s", "i", "-l", lufs_str, "-p", limiter_str, "-O", out_file
             ]
             if hasattr(self, "overwrite_rg") and not self.overwrite_rg:
                 rsgain_cmd.insert(2, "-S")
@@ -191,10 +193,11 @@ class ApplyGainWorker(QObject):
     finished = Signal(list, list)  #error_logs, analysis_results
     progress = Signal(int)   #percent
 
-    def __init__(self, files, lufs, table, supported_filetypes, create_modified=False):
+    def __init__(self, files, lufs, limiter, table, supported_filetypes, create_modified=False):
         super().__init__()
         self.files = files
         self.lufs = lufs
+        self.limiter = limiter
         self.table = table
         self.supported_filetypes = supported_filetypes
         self.create_modified = create_modified
@@ -230,8 +233,9 @@ class ApplyGainWorker(QObject):
             if ext not in self.supported_filetypes:
                 continue
             lufs_str = f"-{abs(self.lufs)}"
+            limiter_str = f"-{abs(float(self.limiter))}"
             tag_cmd = [
-                "rsgain", "custom", "-s", "i", "-l", lufs_str, "-O", file_path
+                "rsgain", "custom", "-s", "i", "-l", lufs_str, "-p", limiter_str, "-O", file_path
             ]
             gain_val = None
             try:
@@ -344,8 +348,9 @@ class ApplyGainWorker(QObject):
                 analysis_results.append((idx, loudness_val, replaygain_val, clipping_val))
                 continue
             try:
+                limiter_str = f"-{abs(float(self.limiter))}"
                 proc = subprocess.run(
-                    ["rsgain", "custom", "-s", "i", "-l", lufs_str, "-O", analyze_path],
+                    ["rsgain", "custom", "-s", "i", "-l", lufs_str, "-p", limiter_str, "-O", analyze_path],
                     capture_output=True, text=True, check=False
                 )
                 output = proc.stdout

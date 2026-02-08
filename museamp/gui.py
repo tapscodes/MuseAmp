@@ -7,7 +7,7 @@ from PySide6.QtWidgets import (
     QLineEdit, QLabel, QDialog, QTextEdit, QDialogButtonBox, QCheckBox,
     QApplication
 )
-from PySide6.QtGui import QIntValidator, QIcon
+from PySide6.QtGui import QIntValidator, QDoubleValidator, QIcon
 from PySide6.QtCore import Qt, QThread
 from .workers import Worker, AddFilesWorker, ApplyGainWorker
 from .utils import find_supported_files
@@ -71,6 +71,14 @@ class AudioToolGUI(QWidget):
         self.replaygain_input.setText("18") #default replaygain 2.0 lufs value (positive version)
         self.replaygain_input.setValidator(QIntValidator(5, 30, self))  #allow only 5 to 30
 
+        #label for limiter/true peak input
+        self.limiter_label = QLabel("Limiter (dB): -")
+        #textbox for limiter value input
+        self.limiter_input = QLineEdit()
+        self.limiter_input.setFixedWidth(50) #fix width for neatness
+        self.limiter_input.setText("0.0") #default limiter value (positive version)
+        self.limiter_input.setValidator(QDoubleValidator(0.0, 10.0, 1, self))  #allow 0.0 to 10.0 with 1 decimal
+
         #add checkbox for "create copy of file(s)"
         self.create_modified_checkbox = QCheckBox("Create copy of file(s) instead of modifying in-place")
         self.create_modified_checkbox.setChecked(False)
@@ -84,6 +92,8 @@ class AudioToolGUI(QWidget):
         self.replaygain_layout = QHBoxLayout()
         self.replaygain_layout.addWidget(self.replaygain_label)
         self.replaygain_layout.addWidget(self.replaygain_input)
+        self.replaygain_layout.addWidget(self.limiter_label)
+        self.replaygain_layout.addWidget(self.limiter_input)
 
         #horizontal layout for buttons
         self.button_layout = QHBoxLayout()
@@ -260,6 +270,7 @@ class AudioToolGUI(QWidget):
         self.gain_btn.setEnabled(enabled)
         self.replaygain_btn.setEnabled(enabled)
         self.replaygain_input.setEnabled(enabled)
+        self.limiter_input.setEnabled(enabled)
         self.table.setEnabled(enabled)
 
     #update table with results from worker
@@ -320,6 +331,13 @@ class AudioToolGUI(QWidget):
             QMessageBox.warning(self, "Invalid LUFS", "Please enter a valid LUFS value.")
             return
 
+        #get user input for limiter from textbox
+        try:
+            limiter = float(self.limiter_input.text())
+        except Exception:
+            QMessageBox.warning(self, "Invalid Limiter", "Please enter a valid limiter value.")
+            return
+
         self.set_ui_enabled(False)
         self.set_progress(0)
         for row in range(self.table.rowCount()):
@@ -328,7 +346,7 @@ class AudioToolGUI(QWidget):
 
         self.worker_thread = QThread()
         self.worker = Worker(
-            files, lufs,
+            files, lufs, limiter,
             create_modified=self.create_modified_checkbox.isChecked()
         )
         if self.create_modified_checkbox.isChecked():
@@ -400,6 +418,13 @@ class AudioToolGUI(QWidget):
             QMessageBox.warning(self, "Invalid LUFS", "Please enter a valid LUFS value.")
             return
 
+        #get limiter value from user input
+        try:
+            limiter = float(self.limiter_input.text())
+        except Exception:
+            QMessageBox.warning(self, "Invalid Limiter", "Please enter a valid limiter value.")
+            return
+
         self.set_ui_enabled(False)
         self.set_progress(0)
         for row in range(self.table.rowCount()):
@@ -408,7 +433,7 @@ class AudioToolGUI(QWidget):
 
         self.gain_worker_thread = QThread()
         self.gain_worker = ApplyGainWorker(
-            files, lufs, self.table, supported_filetypes,
+            files, lufs, limiter, self.table, supported_filetypes,
             create_modified=self.create_modified_checkbox.isChecked()
         )
         if self.create_modified_checkbox.isChecked():
