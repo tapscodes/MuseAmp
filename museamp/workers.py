@@ -78,12 +78,12 @@ class Worker(QObject):
                         emit_progress()
                         continue
             lufs_str = f"-{abs(int(self.lufs))}" if self.lufs is not None else "-18"
-            limiter_str = f"{abs(float(self.limiter))}"
+            limiter_str = f"-{abs(float(self.limiter))}"
             loudness_val = "-"
             replaygain_val = "-"
             clipping_val = "-"
             rsgain_cmd = [
-                "rsgain", "custom", "-s", "i", "-l", lufs_str, "-p", limiter_str, "-O", out_file
+                "rsgain", "custom", "-s", "i", "-l", lufs_str, "-t", "-m", limiter_str, "-O", out_file
             ]
             if hasattr(self, "overwrite_rg") and not self.overwrite_rg:
                 rsgain_cmd.insert(2, "-S")
@@ -233,9 +233,9 @@ class ApplyGainWorker(QObject):
             if ext not in self.supported_filetypes:
                 continue
             lufs_str = f"-{abs(self.lufs)}"
-            limiter_str = f"{abs(float(self.limiter))}"
+            limiter_str = f"-{abs(float(self.limiter))}"
             tag_cmd = [
-                "rsgain", "custom", "-s", "i", "-l", lufs_str, "-p", limiter_str, "-O", file_path
+                "rsgain", "custom", "-s", "i", "-l", lufs_str, "-t", "-m", limiter_str, "-O", file_path
             ]
             gain_val = None
             try:
@@ -348,9 +348,9 @@ class ApplyGainWorker(QObject):
                 analysis_results.append((idx, loudness_val, replaygain_val, clipping_val))
                 continue
             try:
-                limiter_str = f"{abs(float(self.limiter))}"
+                limiter_str = f"-{abs(float(self.limiter))}"
                 proc = subprocess.run(
-                    ["rsgain", "custom", "-s", "i", "-l", lufs_str, "-p", limiter_str, "-O", analyze_path],
+                    ["rsgain", "custom", "-s", "i", "-l", lufs_str, "-t", "-m", limiter_str, "-O", analyze_path],
                     capture_output=True, text=True, check=False
                 )
                 output = proc.stdout
