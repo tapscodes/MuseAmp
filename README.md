@@ -40,11 +40,11 @@ To contribute all you need to do is fork the program, make your changes, and the
 2. Setup flatpak user with ```flatpak remote-add --if-not-exists --user flathub https://dl.flathub.org/repo/flathub.flatpakrepo``` 
 3. Install the current KDE SDK and pyside baseapp (found at the top of the .json file, for example
 with KDE version 6.9 it's ```flatpak install --user flathub org.kde.Sdk//6.9 org.kde.Platform//6.9``` and ```flatpak install --user flathub io.qt.PySide.BaseApp//6.9```)
-4. Build with ```flatpak run org.flatpak.Builder builder-dir --user --ccache --force-clean --install io.github.tapscodes.MuseAmp.json``` and run it with ```flatpak run io.github.tapscodes.MuseAmp```
+4. **Simple build (recommended)**: ```flatpak run org.flatpak.Builder builder-dir --user --ccache --force-clean --install io.github.tapscodes.MuseAmp.json``` then run with ```flatpak run io.github.tapscodes.MuseAmp```
 
-Alternative localtest (no github repo DL) version: ```flatpak run org.flatpak.Builder builder-dir --user --ccache --force-clean --install io.github.tapscodes.MuseAmp.localtest.json``` and ```flatpak run io.github.tapscodes.MuseAmp``` still to run.
+**Alternative build for repo creation** (for linting): Build with ```flatpak-builder --repo=repo --force-clean builder-dir io.github.tapscodes.MuseAmp.json```, add local repo with ```flatpak --user remote-add --no-gpg-verify --if-not-exists local-repo repo```, install with ```flatpak install --user local-repo io.github.tapscodes.MuseAmp```, and run with ```flatpak run io.github.tapscodes.MuseAmp```
 
-Better build command: ```flatpak-builder --repo=repo --force-clean builder-dir io.github.tapscodes.MuseAmp.json```
+**Localtest version** (no github repo DL): ```flatpak run org.flatpak.Builder builder-dir --user --ccache --force-clean --install io.github.tapscodes.MuseAmp.localtest.json``` and ```flatpak run io.github.tapscodes.MuseAmp``` to run.
 
 ## How to check linter for flathub (for devs)
 Run ```flatpak run --command=flatpak-builder-lint org.flatpak.Builder manifest io.github.tapscodes.MuseAmp.json``` to check manifest
