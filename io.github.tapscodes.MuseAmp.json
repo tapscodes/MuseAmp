@@ -83,8 +83,8 @@
       "sources": [
         {
           "type": "archive",
-          "url": "https://github.com/tapscodes/MuseAmp/archive/refs/tags/v1.4.0-hotfix.zip",
-          "sha256": "ad4f1ee0e97a7397d1a9781f7c7a3d1d025b3dace74c4df82878431465e78105"
+          "url": "https://github.com/tapscodes/MuseAmp/archive/refs/tags/v1.4.0.zip",
+          "sha256": "517e012527da74956fb6ba525973349aae30447c5b894e8f3d96cb684d69f761"
         }
       ]
     }
