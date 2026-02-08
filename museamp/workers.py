@@ -78,7 +78,7 @@ class Worker(QObject):
                         emit_progress()
                         continue
             lufs_str = f"-{abs(int(self.lufs))}" if self.lufs is not None else "-18"
-            limiter_str = f"-{abs(float(self.limiter))}"
+            limiter_str = f"{abs(float(self.limiter))}"
             loudness_val = "-"
             replaygain_val = "-"
             clipping_val = "-"
@@ -233,7 +233,7 @@ class ApplyGainWorker(QObject):
             if ext not in self.supported_filetypes:
                 continue
             lufs_str = f"-{abs(self.lufs)}"
-            limiter_str = f"-{abs(float(self.limiter))}"
+            limiter_str = f"{abs(float(self.limiter))}"
             tag_cmd = [
                 "rsgain", "custom", "-s", "i", "-l", lufs_str, "-p", limiter_str, "-O", file_path
             ]
@@ -348,7 +348,7 @@ class ApplyGainWorker(QObject):
                 analysis_results.append((idx, loudness_val, replaygain_val, clipping_val))
                 continue
             try:
-                limiter_str = f"-{abs(float(self.limiter))}"
+                limiter_str = f"{abs(float(self.limiter))}"
                 proc = subprocess.run(
                     ["rsgain", "custom", "-s", "i", "-l", lufs_str, "-p", limiter_str, "-O", analyze_path],
                     capture_output=True, text=True, check=False
