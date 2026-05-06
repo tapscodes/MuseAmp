@@ -286,7 +286,77 @@ class ApplyGainWorker(QObject):
                 "-c:v", "copy"
             ]
             if ext == ".mp3":
+                # For MP3, probe the source format so we can preserve
+                # bitrate, sample rate and channels in the output.
+                src_bit_rate = None
+                src_sample_rate = None
+                src_channels = None
+                try:
+                    probe = subprocess.run(
+                        [
+                            "ffprobe",
+                            "-v",
+                            "error",
+                            "-select_streams",
+                            "a:0",
+                            "-show_entries",
+                            "stream=bit_rate,sample_rate,channels",
+                            "-of",
+                            "default=noprint_wrappers=1",
+                            file_path,
+                        ],
+                        capture_output=True,
+                        text=True,
+                        check=False,
+                    )
+                    if probe.returncode == 0 and probe.stdout.strip():
+                        for line in probe.stdout.strip().splitlines():
+                            if "=" not in line:
+                                continue
+                            key, _, val = line.partition("=")
+                            if not val.isdigit():
+                                continue
+                            v = int(val)
+                            if key == "bit_rate" and v > 0:
+                                src_bit_rate = v
+                            elif key == "sample_rate" and v > 0:
+                                src_sample_rate = v
+                            elif key == "channels" and v > 0:
+                                src_channels = v
+                    # Fallback: try container bitrate if stream bitrate is missing
+                    if src_bit_rate is None:
+                        probe = subprocess.run(
+                            [
+                                "ffprobe",
+                                "-v",
+                                "error",
+                                "-show_entries",
+                                "format=bit_rate",
+                                "-of",
+                                "default=noprint_wrappers=1:nokey=1",
+                                file_path,
+                            ],
+                            capture_output=True,
+                            text=True,
+                            check=False,
+                        )
+                        if (
+                            probe.returncode == 0
+                            and probe.stdout.strip()
+                            and probe.stdout.strip().isdigit()
+                        ):
+                            src_bit_rate = int(probe.stdout.strip())
+                except Exception:
+                    # If probing fails, use encoder defaults.
+                    pass
+
                 ffmpeg_cmd += ["-c:a", "libmp3lame"]
+                if src_bit_rate and src_bit_rate > 0:
+                    ffmpeg_cmd += ["-b:a", str(src_bit_rate)]
+                if src_sample_rate and src_sample_rate > 0:
+                    ffmpeg_cmd += ["-ar", str(src_sample_rate)]
+                if src_channels and src_channels > 0:
+                    ffmpeg_cmd += ["-ac", str(src_channels)]
             elif ext == ".flac":
                 ffmpeg_cmd += ["-c:a", "flac"]
                 try:
