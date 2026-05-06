@@ -27,6 +27,11 @@
   <url type="contribute">https://github.com/tapscodes/MuseAmp</url>
 
   <releases>
+    <release version="1.5.0" date="2026-05-06">
+      <description>
+        <p>Fixed MP3 files not keeping bitrate.</p>
+      </description>
+    </release>
     <release version="1.4.0" date="2026-02-07">
       <description>
         <p>Added limiter option.</p>
